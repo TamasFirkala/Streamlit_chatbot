@@ -3,3 +3,4 @@ cohere
 openai
 llama-index
 langchain
+pypdf
