@@ -1,6 +1,6 @@
 import os
 
-os.environ['OPENAI_API_KEY'] = 'apy_key'
+os.environ['OPENAI_API_KEY'] = 'API_KEY'
 
 import streamlit as st
 
