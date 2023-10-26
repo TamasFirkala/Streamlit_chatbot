@@ -3,7 +3,7 @@ import openai
 
 #os.environ['OPENAI_API_KEY'] = 'API_KEY'
 
-
+openai.api_key  = 'API_KEY'
 
 import streamlit as st
 
@@ -22,7 +22,7 @@ if st.button("Submit"):
 
             from llama_index import SimpleDirectoryReader
 
-            openai.api_key  = "API_KEY"
+            
 
             documents = SimpleDirectoryReader('./data').load_data() 
 
