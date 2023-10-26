@@ -1,6 +1,9 @@
 import os
+import openai
 
-os.environ['OPENAI_API_KEY'] = 'API_KEY'
+#os.environ['OPENAI_API_KEY'] = 'API_KEY'
+
+
 
 import streamlit as st
 
@@ -18,6 +21,8 @@ if st.button("Submit"):
         try:
 
             from llama_index import SimpleDirectoryReader
+
+            openai.api_key  = "API_KEY"
 
             documents = SimpleDirectoryReader('./data').load_data() 
 
