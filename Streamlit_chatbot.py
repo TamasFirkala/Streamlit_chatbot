@@ -3,7 +3,7 @@ import openai
 
 #os.environ['OPENAI_API_KEY'] = 'API_KEY'
 
-openai.api_key  = 'API_KEY'
+#openai.api_key  = 'API_KEY'
 
 import streamlit as st
 
@@ -11,7 +11,7 @@ import streamlit as st
 
 st.title("Ask Llama")
 
-query = st.text_input("What would you like to ask? (source: /content/data_source)", "")
+query = st.text_input("What would you like to ask? (source: /data )", "")
 
 # If the 'Submit' button is clicked
 if st.button("Submit"):
@@ -22,7 +22,7 @@ if st.button("Submit"):
 
             from llama_index import SimpleDirectoryReader
 
-            
+            openai.api_key = os.environ["API_KEY"]
 
             documents = SimpleDirectoryReader('./data').load_data() 
 
