@@ -6,7 +6,7 @@ import openai
 
 #import openai
 
-os.environ['API_KEY'] = st.secrets['API_KEY']
+#os.environ['API_KEY'] = st.secrets['API_KEY']
 
 #openai.api_key  = 'API_KEY'
 
@@ -26,7 +26,7 @@ if st.button("Submit"):
     else:
         try:
 
-            #openai.api_key = os.environ["API_KEY"]
+            openai.api_key = st.secrets['API_KEY']
 
             documents = SimpleDirectoryReader('./data').load_data()        
 
