@@ -6,7 +6,7 @@ import openai
 
 #import openai
 
-os.environ['OPENAI_API_KEY'] = st.secrets['API_KEY']
+os.environ['API_KEY'] = st.secrets['API_KEY']
 
 #openai.api_key  = 'API_KEY'
 
