@@ -7,7 +7,7 @@ openai.api_key = st.secrets["api_secret"]
 
 st.title("Ask Llama")
 
-query = st.text_input("What would you like to ask? (source: /content/data_source)", "")
+query = st.text_input("What would you like to ask? (source: ./data)", "")
 
 if st.button("Submit"):
     if not query.strip():
