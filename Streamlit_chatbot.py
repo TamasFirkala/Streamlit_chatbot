@@ -1,10 +1,9 @@
 
-
+import openai
 import os
-
-os.environ['OPENAI_API_KEY'] = "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"
-
 import streamlit as st
+
+openai.api_key = st.secrets["api_secret"]
 
 st.title("Ask Llama")
 
