@@ -11,7 +11,7 @@ import streamlit as st
 
 st.title("Hi my name Bela, I am a Hungarian chatbot train to help you with machine learning. So don't hesitate to ask me about this topic!")
 
-query = st.text_input("What would you like to ask? (source: /data )", "")
+query = st.text_input("What would you like to ask?", "")
 
 # If the 'Submit' button is clicked
 if st.button("Submit"):
