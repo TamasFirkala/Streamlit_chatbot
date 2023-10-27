@@ -6,11 +6,11 @@ import openai
 
 #import openai
 
-#os.environ['OPENAI_API_KEY'] = 'API_KEY'
+os.environ['OPENAI_API_KEY'] = st.secrets['API_KEY']
 
 #openai.api_key  = 'API_KEY'
 
-openai.api_key = st.secrets['API_KEY']
+#openai.api_key = st.secrets['API_KEY']
 
 
 # Create an index of your documents
