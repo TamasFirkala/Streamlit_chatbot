@@ -30,7 +30,7 @@ if st.button("Submit"):
     else:
         try:
 
-            openai.api_key = st.secrets['API_KEY']
+            #openai.api_key = st.secrets['API_KEY']
 
             documents = SimpleDirectoryReader('./data').load_data()        
 
