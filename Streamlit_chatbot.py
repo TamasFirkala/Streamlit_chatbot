@@ -6,7 +6,7 @@ import openai
 
 os.environ["OPENAI_API_KEY"] = st.secrets["OPENAI_API_KEY"]
 
-openai.api_key = st.secrets['API_KEY']
+#openai.api_key = st.secrets['API_KEY']
 
 #import openai
 
@@ -19,7 +19,7 @@ openai.api_key = st.secrets['API_KEY']
 
 # Create an index of your documents
 
-st.title("Hi my name Bela, I am a Hungarian chatbot trained to help you with machine learning. So don't hesitate to ask me about this topic!")
+st.title("Hi my name is Bela, I am a Hungarian chatbot trained to help you with machine learning. So don't hesitate to ask me about this topic!")
 
 query = st.text_input("What would you like to ask?", "")
 
