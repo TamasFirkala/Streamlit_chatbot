@@ -1,7 +1,7 @@
 import os
 #import openai
 
-#os.environ['OPENAI_API_KEY'] = 'API_KEY'
+os.environ['OPENAI_API_KEY'] = 'API_KEY'
 
 #openai.api_key  = 'API_KEY'
 
@@ -22,7 +22,7 @@ if st.button("Submit"):
 
             from llama_index import SimpleDirectoryReader
 
-            openai.api_key = os.environ["API_KEY"]
+            #openai.api_key = os.environ["API_KEY"]
 
             documents = SimpleDirectoryReader('./data').load_data() 
 
