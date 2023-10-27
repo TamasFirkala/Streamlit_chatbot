@@ -2,13 +2,15 @@ import os
 from llama_index import SimpleDirectoryReader
 from llama_index import GPTVectorStoreIndex
 import streamlit as st
+import openai
 
 #import openai
 
-os.environ['OPENAI_API_KEY'] = 'API_KEY'
+#os.environ['OPENAI_API_KEY'] = 'API_KEY'
 
 #openai.api_key  = 'API_KEY'
 
+openai.api_key = st.secrets['API_KEY']
 
 
 # Create an index of your documents
