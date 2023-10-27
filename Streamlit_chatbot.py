@@ -1,38 +1,26 @@
+
+
 import os
-from llama_index import SimpleDirectoryReader
-from llama_index import GPTVectorStoreIndex
+
+os.environ['OPENAI_API_KEY'] = "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"
+
 import streamlit as st
-import openai
 
-os.environ["OPENAI_API_KEY"] = st.secrets["OPENAI_API_KEY"]
+st.title("Ask Llama")
 
-#openai.api_key = st.secrets['API_KEY']
+query = st.text_input("What would you like to ask? (source: /content/data_source)", "")
 
-#import openai
-
-#os.environ['API_KEY'] = st.secrets['API_KEY']
-
-#openai.api_key  = 'API_KEY'
-
-#openai.api_key = st.secrets['API_KEY']
-
-
-# Create an index of your documents
-
-st.title("Hi my name is Bela, I am a Hungarian chatbot trained to help you with machine learning. So don't hesitate to ask me about this topic!")
-
-query = st.text_input("What would you like to ask?", "")
-
-# If the 'Submit' button is clicked
 if st.button("Submit"):
     if not query.strip():
         st.error(f"Please provide the search query.")
     else:
         try:
 
-            #openai.api_key = st.secrets['API_KEY']
+            from llama_index import SimpleDirectoryReader
 
-            documents = SimpleDirectoryReader('./data').load_data()        
+            documents = SimpleDirectoryReader('/content/data_source').load_data()
+
+            from llama_index import GPTVectorStoreIndex
 
             index = GPTVectorStoreIndex.from_documents(documents)
             query_engine = index.as_query_engine()
@@ -41,9 +29,11 @@ if st.button("Submit"):
 
 
 
-            
+          
             st.success(response)
         except Exception as e:
             st.error(f"An error occurred: {e}")
+
+
 
 
