@@ -4,6 +4,8 @@ from llama_index import GPTVectorStoreIndex
 import streamlit as st
 import openai
 
+os.environ["OPENAI_API_KEY"] = st.secrets["OPENAI_API_KEY"]
+
 openai.api_key = st.secrets['API_KEY']
 
 #import openai
