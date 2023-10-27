@@ -17,7 +17,7 @@ if st.button("Submit"):
 
             from llama_index import SimpleDirectoryReader
 
-            documents = SimpleDirectoryReader('/content/data_source').load_data()
+            documents = SimpleDirectoryReader('./data').load_data()
 
             from llama_index import GPTVectorStoreIndex
 
