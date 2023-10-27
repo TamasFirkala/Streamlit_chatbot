@@ -1,5 +1,5 @@
 import os
-import openai
+#import openai
 
 #os.environ['OPENAI_API_KEY'] = 'API_KEY'
 
