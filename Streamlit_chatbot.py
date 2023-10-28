@@ -5,7 +5,7 @@ import streamlit as st
 
 openai.api_key = st.secrets["api_secret"]
 
-st.title("Ask Llama")
+st.title("Hi I am Bela, a Hungarian chatbot. I am presently being trained to help you with chemistry. Don't hesitate to ask me!")
 
 query = st.text_input("What would you like to ask? (source: ./data)", "")
 
