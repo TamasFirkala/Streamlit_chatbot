@@ -19,6 +19,9 @@ if st.button("Submit"):
 
             documents = SimpleDirectoryReader('./data').load_data()
 
+            from llama_index import LLMPredictor, GPTVectorStoreIndex, PromptHelper
+            from langchain.llms import OpenAI
+
             llm_predictor = LLMPredictor(llm=OpenAI(temperature=0.1, model_name="gpt-4-1106-preview"))
 
             max_input_size = 4096
