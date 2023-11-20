@@ -38,17 +38,7 @@ if st.button("Submit"):
             response = query_engine.query(query)
 
             
-
-            """from llama_index import GPTVectorStoreIndex
-
-            index = GPTVectorStoreIndex.from_documents(documents)
-            query_engine = index.as_query_engine()
-
-            response = query_engine.query(query)"""
-
-
-
-          
+                      
             st.success(response)
         except Exception as e:
             st.error(f"An error occurred: {e}")
