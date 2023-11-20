@@ -19,7 +19,7 @@ if st.button("Submit"):
 
             documents = SimpleDirectoryReader('./data').load_data()
 
-            from llama_index import LLMPredictor, GPTVectorStoreIndex, PromptHelper
+            """from llama_index import LLMPredictor, GPTVectorStoreIndex, PromptHelper
             from langchain.llms import OpenAI
 
             llm_predictor = LLMPredictor(llm=OpenAI(temperature=0.1, model_name="gpt-4-1106-preview"))
@@ -33,16 +33,16 @@ if st.button("Submit"):
 
             query_engine = custom_LLM_index.as_query_engine()
 
-            response = query_engine.query(query)
+            response = query_engine.query(query)"""
 
             
 
-            """from llama_index import GPTVectorStoreIndex
+            from llama_index import GPTVectorStoreIndex
 
             index = GPTVectorStoreIndex.from_documents(documents)
             query_engine = index.as_query_engine()
 
-            response = query_engine.query(query)"""
+            response = query_engine.query(query)
 
 
 
