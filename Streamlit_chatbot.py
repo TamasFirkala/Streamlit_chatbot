@@ -5,7 +5,7 @@ import streamlit as st
 
 openai.api_key = st.secrets["api_secret"]
 
-st.title("Ask ChatGPT about your own data!")
+st.title("You can ask ChatGPT about your own data. This time about climate change!")
 
 query = st.text_input("What would you like to ask?", "")
 
