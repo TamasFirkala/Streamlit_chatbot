@@ -9,7 +9,7 @@ openai.api_key = st.secrets["api_secret"]
 #Frontend preparation uisng Python-streamlit package
 
 #title
-st.title("You can ask ChatGPT about your own data. It learned the next five specific scientific papers in the topic of climate change: https://tinyurl.com/2d4uc2yj  Don't hesitate to ask about them!")
+st.title("You can ask ChatGPT about your own data. It learned the next five specific scientific papers in the topic of climate change. Don't hesitate to ask about them!")
 
 #question
 query = st.text_input("What would you like to ask?", "")
