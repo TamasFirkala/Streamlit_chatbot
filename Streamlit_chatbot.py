@@ -16,24 +16,26 @@ if st.button("Submit"):
         try:
 
             #from llama_index import SimpleDirectoryReader
-            from llama_index.core import SimpleDirectoryReader
+            from llama_index.core import SimpleDirectoryReader, VectorStoreIndex
 
 
             documents = SimpleDirectoryReader('./data').load_data()
 
-            from llama_index import LLMPredictor, GPTVectorStoreIndex, PromptHelper
+            from llama_index import LLMPredictor, GPTVectorStoreIndex
             #from langchain.llms import OpenAI
             from llama_index.llms import OpenAI
 
             llm_predictor = LLMPredictor(llm=OpenAI(temperature=0.1, model_name="gpt-4-1106-preview"))
             #llm_predictor = LLMPredictor(llm=OpenAI(temperature=0.1, model_name="text-davinci-003"))
 
-            max_input_size = 4096
+            """max_input_size = 4096
             num_output = 256
             max_chunk_overlap = 0.5
-            prompt_helper = PromptHelper(max_input_size, num_output, max_chunk_overlap)
+            prompt_helper = PromptHelper(max_input_size, num_output, max_chunk_overlap)"""
 
-            custom_LLM_index = GPTVectorStoreIndex(documents, llm_predictor=llm_predictor, prompt_helper = prompt_helper)
+            #custom_LLM_index = GPTVectorStoreIndex(documents, llm_predictor=llm_predictor, prompt_helper = prompt_helper)#
+
+            custom_LLM_index = GPTVectorStoreIndex(documents, llm_predictor=llm_predictor, )
 
             query_engine = custom_LLM_index.as_query_engine()
 
