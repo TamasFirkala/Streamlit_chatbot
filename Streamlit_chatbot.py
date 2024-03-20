@@ -45,9 +45,9 @@ if st.button("Submit"):
 
             #custom_LLM_index = GPTVectorStoreIndex(documents, llm_predictor=llm_predictor, )
 
-            #query_engine = custom_LLM_index.as_query_engine()
+            query_engine = index.as_query_engine()
 
-            #response = query_engine.query(query)
+            response = query_engine.query(query)
 
             
                       
