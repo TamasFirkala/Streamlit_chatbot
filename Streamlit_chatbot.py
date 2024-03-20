@@ -33,7 +33,7 @@ if st.button("Submit"):
             #from langchain.llms import OpenAI
             #from llama_index.llms import OpenAI
 
-            llm_predictor = LLMPredictor(llm=OpenAI(temperature=0.1, model_name="gpt-4-1106-preview"))
+            #llm_predictor = LLMPredictor(llm=OpenAI(temperature=0.1, model_name="gpt-4-1106-preview"))
             #llm_predictor = LLMPredictor(llm=OpenAI(temperature=0.1, model_name="text-davinci-003"))
 
             """max_input_size = 4096
