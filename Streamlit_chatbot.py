@@ -3,50 +3,41 @@ import openai
 import os
 import streamlit as st
 
+#Connecting OpenAI API
 openai.api_key = st.secrets["api_secret"]
 
+#Frontend preparation uisng Python-streamlit package
+
+#title
 st.title("You can ask ChatGPT about your own data. It learned the next five specific scientific papers in the topic of climate change: https://tinyurl.com/2d4uc2yj  Don't hesitate to ask about them!")
 
+#question
 query = st.text_input("What would you like to ask?", "")
 
+#"submit" button
 if st.button("Submit"):
     if not query.strip():
         st.error(f"Please provide the search query.")
     else:
         try:
 
-            #from llama_index import SimpleDirectoryReader
+            #Connecting large language model using Python Llama_index package
+            
             from llama_index.core import SimpleDirectoryReader, VectorStoreIndex, Settings
             from llama_index.llms.openai import OpenAI
 
+            #Choosing large language model
             Settings.llm = OpenAI(temperature=0.2, model="gpt-4-1106-preview")
-
-            documents = SimpleDirectoryReader('./data').load_data()
-            index = VectorStoreIndex.from_documents(documents)
-
-          
-
-
             
+            #loading data (the articles about climate change)
+            documents = SimpleDirectoryReader('./data').load_data()
 
-            #from llama_index import LLMPredictor
-            #from langchain.llms import OpenAI
-            #from llama_index.llms import OpenAI
-
-            #llm_predictor = LLMPredictor(llm=OpenAI(temperature=0.1, model_name="gpt-4-1106-preview"))
-            #llm_predictor = LLMPredictor(llm=OpenAI(temperature=0.1, model_name="text-davinci-003"))
-
-            """max_input_size = 4096
-            num_output = 256
-            max_chunk_overlap = 0.5
-            prompt_helper = PromptHelper(max_input_size, num_output, max_chunk_overlap)"""
-
-            #custom_LLM_index = GPTVectorStoreIndex(documents, llm_predictor=llm_predictor, prompt_helper = prompt_helper)#
-
-            #custom_LLM_index = GPTVectorStoreIndex(documents, llm_predictor=llm_predictor, )
-
+            #indexing data
+            index = VectorStoreIndex.from_documents(documents)
+            
+            #generating answer
+            
             query_engine = index.as_query_engine()
-
             response = query_engine.query(query)
 
             
