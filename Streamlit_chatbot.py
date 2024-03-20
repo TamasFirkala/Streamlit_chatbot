@@ -15,7 +15,9 @@ if st.button("Submit"):
     else:
         try:
 
-            from llama_index import SimpleDirectoryReader
+            #from llama_index import SimpleDirectoryReader
+            from llama_index.core import SimpleDirectoryReader
+
 
             documents = SimpleDirectoryReader('./data').load_data()
 
