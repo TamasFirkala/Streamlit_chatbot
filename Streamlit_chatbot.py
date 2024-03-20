@@ -21,7 +21,7 @@ if st.button("Submit"):
 
             documents = SimpleDirectoryReader('./data').load_data()
 
-            from llama_index import LLMPredictor, GPTVectorStoreIndex, PromptHelper
+            from llama_index.core import LLMPredictor, GPTVectorStoreIndex, PromptHelper
             #from langchain.llms import OpenAI
             from llama_index.llms import OpenAI
 
