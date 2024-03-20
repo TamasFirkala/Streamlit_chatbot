@@ -16,14 +16,22 @@ if st.button("Submit"):
         try:
 
             #from llama_index import SimpleDirectoryReader
-            from llama_index.core import SimpleDirectoryReader, VectorStoreIndex
+            from llama_index.core import SimpleDirectoryReader, VectorStoreIndex, Settings
+            from llama_index.llms.openai import OpenAI
 
+            Settings.llm = OpenAI(temperature=0.2, model="gpt-4-1106-preview")
 
             documents = SimpleDirectoryReader('./data').load_data()
+            index = VectorStoreIndex.from_documents(documents)
 
-            from llama_index import LLMPredictor, GPTVectorStoreIndex
+          
+
+
+            
+
+            #from llama_index import LLMPredictor
             #from langchain.llms import OpenAI
-            from llama_index.llms import OpenAI
+            #from llama_index.llms import OpenAI
 
             llm_predictor = LLMPredictor(llm=OpenAI(temperature=0.1, model_name="gpt-4-1106-preview"))
             #llm_predictor = LLMPredictor(llm=OpenAI(temperature=0.1, model_name="text-davinci-003"))
@@ -35,11 +43,11 @@ if st.button("Submit"):
 
             #custom_LLM_index = GPTVectorStoreIndex(documents, llm_predictor=llm_predictor, prompt_helper = prompt_helper)#
 
-            custom_LLM_index = GPTVectorStoreIndex(documents, llm_predictor=llm_predictor, )
+            #custom_LLM_index = GPTVectorStoreIndex(documents, llm_predictor=llm_predictor, )
 
-            query_engine = custom_LLM_index.as_query_engine()
+            #query_engine = custom_LLM_index.as_query_engine()
 
-            response = query_engine.query(query)
+            #response = query_engine.query(query)
 
             
                       
