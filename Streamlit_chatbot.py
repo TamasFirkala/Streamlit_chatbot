@@ -49,8 +49,29 @@ PAPERS_INFO = {
             "department": "Department of Architecture and Built Environment",
             "location": "Ningbo, China"
         }
+    },
+    "paper3.pdf": {
+        "title": "Warming Power of CO₂ and H₂O: Correlations with Temperature Changes",
+        "authors": "Paulo Cesar Soares",
+        "year": "2010",
+        "journal": "International Journal of Geosciences",
+        "volume": "1",
+        "pages": "102-112",
+        "doi": "10.4236/ijg.2010.13014",
+        "keywords": ["Global Warming", "CO₂", "Vapor Greenhouse"],
+        "abstract": "The dramatic and threatening environmental changes announced for the next decades are the result of models whose main drive factor of climatic changes is the increasing carbon dioxide in the atmosphere. Although taken as a premise, the hypothesis does not have verifiable consistence. The comparison of temperature changes and CO₂ changes in the atmosphere is made for a large diversity of conditions, with the same data used to model climate changes. Correlation of historical series of data is the main approach. CO₂ changes are closely related to temperature. Warmer seasons or triennial phases are followed by an atmosphere that is rich in CO₂, reflecting the gas solving or exsolving from water, and not photosynthesis activity. Interannual correlations between the variables are good. A weak dominance of temperature changes precedence, relative to CO₂ changes, indicate that the main effect is the CO₂ increase in the atmosphere due to temperature rising. Decreasing temperature is not followed by CO₂ decrease, which indicates a different route for the CO₂ capture by the oceans, not by gas re-absorption. Monthly changes have no correspondence as would be expected if the warming was an important absorption-radiation effect of the CO₂ increase. The anthropogenic wasting of fossil fuel CO₂ to the atmosphere shows no relation with the temperature changes even in an annual basis. The absence of immediate relation between CO₂ and temperature is evidence that rising its mix ratio in the atmosphere will not imply more absorption and time residence of energy over the Earth surface. This is explained because band absorption is nearly all done with historic CO₂ values. Unlike CO₂, water vapor in the atmosphere is rising in tune with temperature changes, even in a monthly scale. The rising energy absorption of vapor is reducing the outcoming long wave radiation window and amplifying warming regionally and in a different way around the globe.",
+        "publication_info": {
+            "url": "http://www.SciRP.org/journal/ijg",
+            "published_date": "November 2010"
+        },
+        "author_affiliation": {
+            "institution": "Federal University of Parana (UFPR)",
+            "department": "Earth Sciences",
+            "location": "Curitiba, Brazil"
+        }
     }
 }
+    
 
 def save_to_history(question, answer):
     """Save Q&A to session state chat history"""
