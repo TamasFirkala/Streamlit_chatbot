@@ -10,6 +10,7 @@ from datetime import datetime
 if 'chat_history' not in st.session_state:
     st.session_state.chat_history = []
 
+# Papers Information Dictionary
 PAPERS_INFO = {
     "paper1.pdf": {
         "title": "Climate Change Adaptation and Historic Settlements: Evidence from the Old Town of Corfu",
@@ -71,7 +72,6 @@ PAPERS_INFO = {
         }
     }
 }
-    
 
 def save_to_history(question, answer):
     """Save Q&A to session state chat history"""
@@ -93,17 +93,19 @@ def display_paper_info(paper_info):
     **Pages:** {paper_info['pages']}  
     **DOI:** [{paper_info['doi']}](https://doi.org/{paper_info['doi']})
     
-    **Publication Details:**
-    - ISSN Online: {paper_info['publication_info']['issn_online']}
-    - ISSN Print: {paper_info['publication_info']['issn_print']}
-    - Journal URL: [{paper_info['publication_info']['url']}]({paper_info['publication_info']['url']})
-    - Published Date: {paper_info['publication_info']['published_date']}
-    
     **Keywords:** {', '.join(paper_info['keywords'])}
     
     **Abstract:**  
     {paper_info['abstract']}
+    
+    **Publication Details:**
+    {', '.join(f"{k}: {v}" for k, v in paper_info['publication_info'].items() if v)}
     """)
+    
+    if 'author_affiliation' in paper_info:
+        st.markdown("**Author Affiliation:**")
+        for key, value in paper_info['author_affiliation'].items():
+            st.markdown(f"- {key}: {value}")
 
 # Page configuration
 st.set_page_config(
@@ -126,7 +128,7 @@ with tab1:
         # Title and description
         st.title("Climate Change Research Assistant")
         st.markdown("""
-        Ask questions about scientific papers on climate change. 
+        Ask questions about these specific scientific papers on climate change. 
         Your questions will be answered using the knowledge from these papers.
         Check the 'Research Papers' tab to see details about the source documents.
         """)
@@ -186,21 +188,22 @@ with tab2:
     st.markdown("""
     ### About the Research Papers
     These are the scientific papers that form the knowledge base for this assistant.
-    Each paper is presented with full bibliographic information and abstract.
+    Understanding their content will help you ask more specific questions.
     """)
     
     # Display paper information in expandable sections
     for paper_id, info in PAPERS_INFO.items():
         with st.expander(f"📚 {info['title']}", expanded=False):
             display_paper_info(info)
-            
-            # Add a citation format section
-            st.markdown("**Suggested Citation:**")
-            st.code(
-                f"{info['authors']}. ({info['year']}). {info['title']}. "
-                f"{info['journal']}, {info['volume']}, {info['pages']}. "
-                f"https://doi.org/{info['doi']}"
-            )
+
+    # Add citation guidelines
+    st.markdown("""
+    ### How to Cite
+    When using information from these papers, please ensure proper citation using the following format:
+    ```
+    Author(s). (Year). Title. Journal, Volume, Pages. DOI
+    ```
+    """)
 
 # Footer
 st.markdown("---")
