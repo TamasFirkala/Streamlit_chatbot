@@ -6,10 +6,11 @@ from llama_index.llms.openai import OpenAI
 import json
 from datetime import datetime
 
-# Initialize session state for chat history and document info
+# Initialize session state for chat history
 if 'chat_history' not in st.session_state:
     st.session_state.chat_history = []
 
+# Document information
 PAPERS_INFO = {
     "paper1.pdf": {
         "title": "Climate Change Adaptation and Historic Settlements: Evidence from the Old Town of Corfu",
@@ -28,22 +29,7 @@ PAPERS_INFO = {
             "published_date": "September 27, 2023"
         }
     }
-    # Other papers will be added as they're shared
 }
-
-
-
-# Document information
-#PAPERS_INFO = {
-#    "paper1.pdf": {
-#        "title": "Climate Change Impact Analysis 2023",
-#        "authors": "Smith, J., Johnson, M.",
-#        "year": "2023",
-#        "keywords": ["climate modeling", "environmental impact", "global warming"],
-#        "abstract": "This study analyzes the recent trends in climate change..."
-#    },
-#    # Add information for other papers similarly
-
 
 def save_to_history(question, answer):
     """Save Q&A to session state chat history"""
@@ -57,8 +43,20 @@ def display_paper_info(paper_info):
     """Display formatted paper information"""
     st.markdown(f"""
     #### 📄 {paper_info['title']}
+    
     **Authors:** {paper_info['authors']}  
     **Year:** {paper_info['year']}  
+    **Journal:** {paper_info['journal']}  
+    **Volume:** {paper_info['volume']}  
+    **Pages:** {paper_info['pages']}  
+    **DOI:** [{paper_info['doi']}](https://doi.org/{paper_info['doi']})
+    
+    **Publication Details:**
+    - ISSN Online: {paper_info['publication_info']['issn_online']}
+    - ISSN Print: {paper_info['publication_info']['issn_print']}
+    - Journal URL: [{paper_info['publication_info']['url']}]({paper_info['publication_info']['url']})
+    - Published Date: {paper_info['publication_info']['published_date']}
+    
     **Keywords:** {', '.join(paper_info['keywords'])}
     
     **Abstract:**  
@@ -86,7 +84,7 @@ with tab1:
         # Title and description
         st.title("Climate Change Research Assistant")
         st.markdown("""
-        Ask questions about five specific scientific papers on climate change. 
+        Ask questions about scientific papers on climate change. 
         Your questions will be answered using the knowledge from these papers.
         Check the 'Research Papers' tab to see details about the source documents.
         """)
@@ -146,22 +144,21 @@ with tab2:
     st.markdown("""
     ### About the Research Papers
     These are the scientific papers that form the knowledge base for this assistant.
-    Understanding their content will help you ask more specific questions.
+    Each paper is presented with full bibliographic information and abstract.
     """)
     
     # Display paper information in expandable sections
     for paper_id, info in PAPERS_INFO.items():
         with st.expander(f"📚 {info['title']}", expanded=False):
             display_paper_info(info)
-
-    # Add citation guidelines
-    st.markdown("""
-    ### How to Cite
-    When using information from these papers, please ensure proper citation using the following format:
-    ```
-    Author(s). (Year). Title. Journal/Source.
-    ```
-    """)
+            
+            # Add a citation format section
+            st.markdown("**Suggested Citation:**")
+            st.code(
+                f"{info['authors']}. ({info['year']}). {info['title']}. "
+                f"{info['journal']}, {info['volume']}, {info['pages']}. "
+                f"https://doi.org/{info['doi']}"
+            )
 
 # Footer
 st.markdown("---")
