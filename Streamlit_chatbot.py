@@ -32,19 +32,17 @@ PAPERS_INFO = {
 }
 
 
-"""
+
 # Document information
-PAPERS_INFO = {
-    "paper1.pdf": {
-        "title": "Climate Change Impact Analysis 2023",
-        "authors": "Smith, J., Johnson, M.",
-        "year": "2023",
-        "keywords": ["climate modeling", "environmental impact", "global warming"],
-        "abstract": "This study analyzes the recent trends in climate change..."
-    },
-    # Add information for other papers similarly
-}
-"""
+#PAPERS_INFO = {
+#    "paper1.pdf": {
+#        "title": "Climate Change Impact Analysis 2023",
+#        "authors": "Smith, J., Johnson, M.",
+#        "year": "2023",
+#        "keywords": ["climate modeling", "environmental impact", "global warming"],
+#        "abstract": "This study analyzes the recent trends in climate change..."
+#    },
+#    # Add information for other papers similarly
 
 
 def save_to_history(question, answer):
