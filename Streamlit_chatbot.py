@@ -10,6 +10,29 @@ from datetime import datetime
 if 'chat_history' not in st.session_state:
     st.session_state.chat_history = []
 
+PAPERS_INFO = {
+    "paper1.pdf": {
+        "title": "Climate Change Adaptation and Historic Settlements: Evidence from the Old Town of Corfu",
+        "authors": "Eleni Maistrou, Vasiliki Pougkakioti, Miltiadis Lazoglou",
+        "year": "2023",
+        "journal": "American Journal of Climate Change",
+        "volume": "12",
+        "pages": "418-455",
+        "doi": "10.4236/ajcc.2023.123020",
+        "keywords": ["Historic Settlements", "Archaeological Site", "Vulnerability", "Climate Change", "Adaptation Strategy"],
+        "abstract": "The Old Town of Corfu is an excellent example of a historic town and a World Heritage Site, distinguished by its authentic and unique character, as reflected in its Venetian-era fortifications and extensive historic building stock. Simultaneously, the Old Town of Corfu is also a vibrant modern city vulnerable to various pressures, including climate change. This paper aims to evaluate the effects of climate change on this modern city monument, assess its vulnerability using the Intergovernmental Panel on Climate Change's methodology, and develop a comprehensive set of adaptation proposals. The methodology of this paper is based on the analysis of climate data for the Old Town of Corfu, from which the assessment of the extreme weather events and climate changes that pose the greatest threat to the Old Town and the assessment of its vulnerability to these threats are derived. The dense geometrical characteristics of the city's structure, the intense pathology observed in the materials and structures of the historic building stock, problems in the existing electromechanical infrastructure, and the poor management of issues such as increased tourism and heavy traffic congestion are the primary factors that make the Old Town of Corfu vulnerable to the effects of climate change.",
+        "publication_info": {
+            "issn_online": "2167-9509",
+            "issn_print": "2167-9495",
+            "url": "https://www.scirp.org/journal/ajcc",
+            "published_date": "September 27, 2023"
+        }
+    }
+    # Other papers will be added as they're shared
+}
+
+
+"""
 # Document information
 PAPERS_INFO = {
     "paper1.pdf": {
@@ -21,6 +44,8 @@ PAPERS_INFO = {
     },
     # Add information for other papers similarly
 }
+"""
+
 
 def save_to_history(question, answer):
     """Save Q&A to session state chat history"""
