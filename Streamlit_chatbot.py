@@ -10,7 +10,6 @@ from datetime import datetime
 if 'chat_history' not in st.session_state:
     st.session_state.chat_history = []
 
-# Document information
 PAPERS_INFO = {
     "paper1.pdf": {
         "title": "Climate Change Adaptation and Historic Settlements: Evidence from the Old Town of Corfu",
@@ -27,6 +26,28 @@ PAPERS_INFO = {
             "issn_print": "2167-9495",
             "url": "https://www.scirp.org/journal/ajcc",
             "published_date": "September 27, 2023"
+        }
+    },
+    "paper2.pdf": {
+        "title": "The Analysis of Global Warming Patterns from 1970s to 2010s",
+        "authors": "Ali Cheshmehzangi",
+        "year": "2020",
+        "journal": "Atmospheric and Climate Sciences",
+        "volume": "10",
+        "pages": "392-404",
+        "doi": "10.4236/acs.2020.103022",
+        "keywords": ["Global Warming", "Climate Change", "Global Warming Patterns", "Atmospheric Temperature", "Ocean Surface Temperature", "Global Warming Impacts"],
+        "abstract": "While global warming is only one part of climate change effects, it poses the highest risk to our habitats and ecologies. It is alarming that global warming has heightened in multiple locations and is intensified since the early 1970s. Since then, there are certain global warming patterns that could guide us with an overview of what mitigation and adaptation strategies should be developed in the future decades. There are certain regions affected more than another, and there are certain patterns with adverse effects on regions, sub-regions, and even continents. This study provides an insightful analysis of recent global warming patterns, those that are affecting us the most with regional climate change of different types, upsurge in frequency and intensity of natural disasters, and drastic impacts on our ecosystems around the world. By analysing the global warming patterns of these last four decades, this research study sheds light on where these patterns are coming from, how they are developing, and what are their impacts. This study is conducted through grey literature and analysis of the recorded global warming data publicly available by the NASA-GISS data centre for global temperature. This brief—but comprehensive—analysis helps us to have a better understanding of what comes next for global warming impacts, and how we should ultimately react. The study contributes to the field by discovering three key points analysed based on available data and literature on recorded global temperature, including: differences between north and south hemispheres, specific patterns due to ocean surface temperature increase, and recent impacts on particular regions. The study concludes with the importance of global scale analysis to have a more realistic understanding of the global warming patterns and their impacts on all living habitats.",
+        "publication_info": {
+            "issn_online": "2160-0422",
+            "issn_print": "2160-0414",
+            "url": "https://www.scirp.org/journal/acs",
+            "published_date": "July 1, 2020"
+        },
+        "author_affiliation": {
+            "institution": "The University of Nottingham Ningbo China",
+            "department": "Department of Architecture and Built Environment",
+            "location": "Ningbo, China"
         }
     }
 }
