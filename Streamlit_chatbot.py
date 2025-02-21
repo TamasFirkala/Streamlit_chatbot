@@ -230,7 +230,7 @@ with tab1:
         # Add a clear history button
         if st.button("Clear History"):
             st.session_state.chat_history = []
-            st.experimental_rerun()
+            st.rerun()
         
         # Display chat history
         if st.session_state.chat_history:
