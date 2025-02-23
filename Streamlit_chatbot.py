@@ -5,7 +5,8 @@ from llama_index.embeddings.openai import OpenAIEmbedding
 from llama_index.vector_stores.pinecone import PineconeVectorStore
 from llama_index.core import VectorStoreIndex
 from llama_index.core import ServiceContext
-from llama_index.llms import OpenAI  # Added this but keeping original import structure
+#from llama_index.llms import OpenAI  # Added this but keeping original import structure
+from llama_index.llms.openai import OpenAI
 
 st.title("API Connection Test")
 
