@@ -1,99 +1,30 @@
 import streamlit as st
 import openai
-from pinecone import Pinecone as PineconeClient
+import pinecone
 from llama_index.embeddings.openai import OpenAIEmbedding
 from llama_index.vector_stores.pinecone import PineconeVectorStore
-from llama_index.core import VectorStoreIndex
-from llama_index.core import ServiceContext
-from llama_index.llms.openai import OpenAI
-from llama_index.core import Settings
+from llama_index.vector_stores.types import VectorStore
+from llama_index import VectorStoreIndex, ServiceContext
+from llama_index.llms import OpenAI
+from llama_index.indices.query.query_transform.contracts import QueryTransform
+from llama_index.indices.query.visualizations import QueryVisualization
 
-# Global settings
-Settings.llm = OpenAI(model="gpt-3.5-turbo", api_key=st.secrets["openai_api_key"])
-Settings.embed_model = OpenAIEmbedding(
-    model_name="text-embedding-3-small",
-    dimensions=384,
-    api_key=st.secrets["openai_api_key"]
-)
+# Initialize OpenAI settings
+openai.api_key = st.secrets["openai_api_key"]
+
+# Initialize session state variables if not already set
+if 'query_engine' not in st.session_state:
+    st.session_state['query_engine'] = None
 
 st.title("API Connection Test")
 
 # Add expanders for each test
-with st.expander("Test OpenAI Connection"):
-    try:
-        # Test OpenAI connection
-        if st.button("Test OpenAI API"):
-            openai.api_key = st.secrets["openai_api_key"]
-
-            # Try to create a simple embedding
-            embed_model = OpenAIEmbedding(
-                model_name="text-embedding-3-small",
-                dimensions=384,
-                api_key=st.secrets["openai_api_key"]
-            )
-             
-            test_embedding = embed_model.get_text_embedding("Hello, world!")
-
-            st.success(f"""
-                OpenAI connection successful!
-                - API key is valid
-                - Embedding model working
-                - Embedding dimension: {len(test_embedding)}
-            """)
-
-    except Exception as e:
-        st.error(f"OpenAI API Error: {str(e)}")
-
-with st.expander("Test Pinecone Connection"):
-    try:
-        # Test Pinecone connection
-        if st.button("Test Pinecone API"):
-            pc = PineconeClient(
-                api_key=st.secrets["pinecone_api_key"],
-                environment=st.secrets["pinecone_environment"]
-            )
-
-            # Try to get index information
-            index_name = st.secrets["pinecone_index_name"]
-            index = pc.Index(index_name)
-            index_stats = index.describe_index_stats()
-
-            st.success(f"""
-                Pinecone connection successful!
-                - API key is valid
-                - Index '{index_name}' exists
-                - Total vectors: {index_stats.total_vector_count}
-                - Dimension: {index_stats.dimension}
-            """)
-
-    except Exception as e:
-        st.error(f"Pinecone API Error: {str(e)}")
-
-# Display current secrets (without showing actual values)
-with st.expander("Check Configured Secrets"):
-    st.write("Checking for required secrets...")
-    
-    # Check if each required secret exists
-    secrets_status = {
-        "OPENAI_API_KEY": "openai_api_key" in st.secrets,
-        "PINECONE_API_KEY": "pinecone_api_key" in st.secrets,
-        "PINECONE_INDEX_NAME": "pinecone_index_name" in st.secrets,
-        "PINECONE_ENVIRONMENT": "pinecone_environment" in st.secrets
-    }
-    
-    for secret_name, exists in secrets_status.items():
-        if exists:
-            st.success(f"✅ {secret_name} is configured")
-        else:
-            st.error(f"❌ {secret_name} is missing")
-
 with st.expander("Test LlamaIndex-Pinecone Connection"):
-    try:
-        if st.button("Test LlamaIndex-Pinecone Integration"):
+    if st.button("Initialize LlamaIndex-Pinecone Integration"):
+        try:
             # Initialize components
             embed_model = OpenAIEmbedding(
-                model_name="text-embedding-3-small",
-                dimensions=384,
+                model_name="text-embedding-ada-002",
                 api_key=st.secrets["openai_api_key"]
             )
             
@@ -104,16 +35,19 @@ with st.expander("Test LlamaIndex-Pinecone Connection"):
                 api_key=st.secrets["openai_api_key"]
             )
             
-            # Update Settings instead of using ServiceContext
-            Settings.llm = llm
-            Settings.embed_model = embed_model
+            # Create a service context
+            service_context = ServiceContext.from_defaults(
+                llm=llm,
+                embed_model=embed_model
+            )
             
-            pc = PineconeClient(
+            # Initialize Pinecone
+            pinecone.init(
                 api_key=st.secrets["pinecone_api_key"],
                 environment=st.secrets["pinecone_environment"]
             )
             index_name = st.secrets["pinecone_index_name"]
-            pinecone_index = pc.Index(index_name)
+            pinecone_index = pinecone.Index(index_name)
             
             # Create vector store
             vector_store = PineconeVectorStore(
@@ -122,60 +56,32 @@ with st.expander("Test LlamaIndex-Pinecone Connection"):
             
             # Create vector store index without service_context
             vector_index = VectorStoreIndex.from_vector_store(
-                vector_store
+                vector_store,
+                service_context=service_context
             )
             
-            # Simple test query to verify connection
-            query_engine = vector_index.as_query_engine()
-            stats = pinecone_index.describe_index_stats()
+            # Create a query engine and store in session state
+            st.session_state['query_engine'] = vector_index.as_query_engine()
             
-            st.success(f"""
-                LlamaIndex-Pinecone connection successful!
-                - Vector store connected
-                - Number of vectors in index: {stats.total_vector_count}
-                - Dimension: {stats.dimension}
-                
-                Try a test query below:
-            """)
-            
-            # Add a simple query interface
-            col1, col2 = st.columns(2)
-            with col1:
-                test_query = st.text_input("Enter a test query:", "What is this document about?")
-            with col2:
-                query_button = st.button("Run Query", key="unique_query_button")
+            # Success message
+            st.success("LlamaIndex-Pinecone integration initialized successfully!")
+        
+        except Exception as e:
+            st.error(f"Initialization Error: {str(e)}")
 
-            if query_button:  # Check if the query button was clicked
-                st.write("Button clicked, starting query...")  # Debug message
-                
-                try:
-                    st.write("Attempting to run query...")  # Debug message
-                    response = query_engine.query(test_query)
-                    st.write("Query completed!")  # Debug message
-                    
-                    # Display the response in multiple formats
-                    st.write("Raw response type:", type(response))
-                    st.write("Response as string:", str(response))
-                    
-                    if hasattr(response, 'response'):
-                        st.write("Response.response:", response.response)
-                    
-                    if hasattr(response, 'text'):
-                        st.write("Response.text:", response.text)
-                        
-                except Exception as e:
-                    st.error(f"Error during query execution: {str(e)}")
-                    st.write("Full error details:", e)
-                    import traceback
-                    st.write("Traceback:", traceback.format_exc())
-                    
-    except Exception as e:
-        st.error(f"LlamaIndex-Pinecone Integration Error: {str(e)}")
+# Query Interface
+st.header("Run a Query")
 
-st.markdown("---")
-st.markdown("""
-### How to use:
-1. Click each test button to verify the corresponding API connection
-2. Check the configured secrets to ensure all required keys are present
-3. If you see any errors, verify your API keys and index name in the Streamlit secrets
-""")
+# Check if the query engine is initialized
+if st.session_state['query_engine'] is None:
+    st.warning("Please initialize the LlamaIndex-Pinecone integration first.")
+else:
+    # Create the query interface
+    test_query = st.text_input("Enter a test query:", "What is this document about?")
+    if st.button("Run Query"):
+        try:
+            response = st.session_state['query_engine'].query(test_query)
+            st.write("**Response:**")
+            st.write(response.response)
+        except Exception as e:
+            st.error(f"Error during query execution: {str(e)}")
