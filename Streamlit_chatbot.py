@@ -142,14 +142,27 @@ with st.expander("Test LlamaIndex-Pinecone Connection"):
             test_query = st.text_input("Enter a test query:", "What is this document about?")
             if st.button("Run Query"):
                 with st.spinner("Generating response..."):
-                    response = query_engine.query(test_query)
-                    st.write("Response:")
-                    st.write(str(response))  # Convert response to string explicitly
-                    st.write("Response Source Nodes:")
-                    for source_node in response.source_nodes:  # Display source nodes if available
-                        st.write("Source Text:", source_node.node.text)
-                        st.write("Score:", source_node.score)
-                        st.write("---")
+                    try:
+                        response = query_engine.query(test_query)
+                        st.write("Raw Response Object:", type(response))  # Debug info
+                        st.write("Response Content:", str(response))
+                        
+                        # Try accessing different response attributes
+                        st.write("Response as string:", str(response))
+                        if hasattr(response, 'response'):
+                            st.write("Response.response:", response.response)
+                        if hasattr(response, 'text'):
+                            st.write("Response.text:", response.text)
+                        
+                        # Display source nodes if available
+                        if hasattr(response, 'source_nodes'):
+                            st.write("Source Nodes:")
+                            for node in response.source_nodes:
+                                st.write("- Source:", node.node.text[:200] + "...")
+                                
+                    except Exception as e:
+                        st.error(f"Error processing response: {str(e)}")
+                        st.write("Full error:", e)
 
     except Exception as e:
         st.error(f"LlamaIndex-Pinecone Integration Error: {str(e)}")
