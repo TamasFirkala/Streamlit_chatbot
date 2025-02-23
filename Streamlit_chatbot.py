@@ -10,13 +10,13 @@ with st.expander("Test OpenAI Connection"):
     try:
         # Test OpenAI connection
         if st.button("Test OpenAI API"):
-            openai.api_key = st.secrets["OPENAI_API_KEY"]
+            openai.api_key = st.secrets["openai_api_key"]
             
             # Try to create a simple embedding
             embed_model = OpenAIEmbedding(
                 model_name="text-embedding-3-small",
                 dimensions=384,
-                api_key=st.secrets["OPENAI_API_KEY"]
+                api_key=st.secrets["openai_api_key"]
             )
             
             test_embedding = embed_model.get_text_embedding("Hello, world!")
@@ -35,10 +35,10 @@ with st.expander("Test Pinecone Connection"):
     try:
         # Test Pinecone connection
         if st.button("Test Pinecone API"):
-            pc = Pinecone(api_key=st.secrets["PINECONE_API_KEY"])
+            pc = Pinecone(api_key=st.secrets["pinecone_api_key"])
             
             # Try to get index information
-            index_name = st.secrets["PINECONE_INDEX_NAME"]
+            index_name = st.secrets["pinecone_index_name"]
             index_info = pc.describe_index(index_name)
             
             st.success(f"""
@@ -59,9 +59,9 @@ with st.expander("Check Configured Secrets"):
     
     # Check if each required secret exists
     secrets_status = {
-        "OPENAI_API_KEY": "OPENAI_API_KEY" in st.secrets,
-        "PINECONE_API_KEY": "PINECONE_API_KEY" in st.secrets,
-        "PINECONE_INDEX_NAME": "PINECONE_INDEX_NAME" in st.secrets
+        "openai_api_key": "openai_api_key" in st.secrets,
+        "pinecone_api_key": "pinecone_api_key" in st.secrets,
+        "pinecone_index_name": "pinecone_index_name" in st.secrets
     }
     
     for secret_name, exists in secrets_status.items():
