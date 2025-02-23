@@ -5,6 +5,7 @@ from llama_index.embeddings.openai import OpenAIEmbedding
 from llama_index.vector_stores.pinecone import PineconeVectorStore
 from llama_index.core import VectorStoreIndex
 from llama_index.core import ServiceContext
+from llama_index.core import Document
 
 st.title("API Connection Test")
 
@@ -107,14 +108,27 @@ with st.expander("Test LlamaIndex-Pinecone Connection"):
                 embed_model=embed_model
             )
             
-            # Simple test query to verify connection
-            query_engine = vector_index.as_query_engine()
+            # Get index stats
             stats = pinecone_index.describe_index_stats()
+            
+            # Add a test document if the index is empty
+            if stats.total_vector_count == 0:
+                st.warning("Index is empty. Adding a test document...")
+                test_doc = Document(
+                    text="This is a test document. It contains information about artificial intelligence and machine learning. AI and ML are transforming various industries including healthcare, finance, and transportation. Machine learning models can analyze large datasets to identify patterns and make predictions. Artificial intelligence systems can perform tasks that typically require human intelligence, such as visual perception, speech recognition, and decision-making."
+                )
+                vector_index.insert(test_doc)
+                st.success("Test document added successfully!")
+                # Refresh stats after adding document
+                stats = pinecone_index.describe_index_stats()
+            
+            # Create query engine
+            query_engine = vector_index.as_query_engine()
             
             st.success(f"""
                 LlamaIndex-Pinecone connection successful!
                 - Vector store connected
-                - Index statistics retrieved
+                - Number of vectors in index: {stats.total_vector_count}
                 - Connection verified
                 
                 Try a test query below:
@@ -123,21 +137,28 @@ with st.expander("Test LlamaIndex-Pinecone Connection"):
             # Add a simple query interface
             test_query = st.text_input("Enter a test query:", "What is this document about?")
             if st.button("Run Query"):
-
-                from llama_index.core import SimpleDirectoryReader, VectorStoreIndex, Settings
-                from llama_index.llms.openai import OpenAI
-
-                #Choosing large language model
-                Settings.llm = OpenAI(temperature=0.2, model="gpt-4-1106-preview")
-
-                #generating answer
-            
-                query_engine = vector_index.as_query_engine()
-                response = query_engine.query(test_query)
-            
-                
-                response = query_engine.query(test_query)
-                st.write("Response:", response)
+                with st.spinner("Processing query..."):
+                    response = query_engine.query(test_query)
+                    
+                    # Create a dedicated area for the response
+                    st.markdown("### Query Response:")
+                    st.markdown("---")
+                    
+                    # Display the response in different formats
+                    st.markdown("**Response Text:**")
+                    st.write(str(response))
+                    
+                    # Display the raw response object
+                    st.markdown("**Raw Response Object:**")
+                    st.json({
+                        "response_text": str(response),
+                        "response_type": type(response).__name__,
+                    })
+                    
+                    # Optional: Display metadata if available
+                    if hasattr(response, 'metadata'):
+                        st.markdown("**Metadata:**")
+                        st.json(response.metadata)
 
     except Exception as e:
         st.error(f"LlamaIndex-Pinecone Integration Error: {str(e)}")
