@@ -1,9 +1,10 @@
 import streamlit as st
-from pinecone import Pinecone  # Changed back to this import
+from pinecone import Pinecone
 from llama_index.core import VectorStoreIndex
 from llama_index.vector_stores.pinecone import PineconeVectorStore
 from llama_index.embeddings.openai import OpenAIEmbedding
 from llama_index.llms.openai import OpenAI
+import openai  # Add this import
 
 # Page configuration
 st.set_page_config(
@@ -26,27 +27,29 @@ def check_secrets():
         st.write("Please add these secrets in your Streamlit configuration.")
         st.stop()
 
+# Initialize OpenAI
+@st.cache_resource
+def init_openai():
+    openai.api_key = st.secrets["openai_api_key"]
+    
+    return OpenAI(
+        api_key=st.secrets["openai_api_key"],
+        temperature=0.2,
+        model="gpt-4-1106-preview"
+    )
+
 # Initialize embedding model
 @st.cache_resource
 def init_embeddings():
     return OpenAIEmbedding(
+        api_key=st.secrets["openai_api_key"],
         model_name="text-embedding-3-small",
-        dimensions=384,
-        api_key=st.secrets["openai_api_key"]
-    )
-
-# Initialize LLM
-@st.cache_resource
-def init_llm():
-    return OpenAI(
-        temperature=0.2, 
-        model="gpt-4-1106-preview", 
-        api_key=st.secrets["openai_api_key"]
+        dimensions=384
     )
 
 # Initialize Pinecone and create query engine
 @st.cache_resource
-def init_query_engine():
+def init_query_engine(embed_model):
     try:
         # Initialize Pinecone
         pc = Pinecone(api_key=st.secrets["pinecone_api_key"])
@@ -63,7 +66,7 @@ def init_query_engine():
         # Create index from vector store
         index = VectorStoreIndex.from_vector_store(
             vector_store,
-            embed_model=init_embeddings()
+            embed_model=embed_model
         )
         
         return index.as_query_engine()
@@ -71,7 +74,7 @@ def init_query_engine():
     except Exception as e:
         st.error(f"Error initializing Pinecone: {str(e)}")
         st.write("Please check your Pinecone configuration.")
-        st.stop()
+        raise e
 
 # Main app
 def main():
@@ -86,11 +89,18 @@ def main():
         st.write("✅ Pinecone API Key configured")
         st.write(f"📍 Pinecone Index: {st.secrets['pinecone_index_name']}")
     
-    # Initialize components
     try:
+        # Initialize OpenAI first
+        llm = init_openai()
+        st.write("OpenAI initialized successfully")
+        
+        # Initialize embeddings
         embed_model = init_embeddings()
-        llm = init_llm()
-        query_engine = init_query_engine()
+        st.write("Embeddings initialized successfully")
+        
+        # Initialize query engine with embeddings
+        query_engine = init_query_engine(embed_model)
+        st.write("Query engine initialized successfully")
         
         # Create the question input
         question = st.text_input("Ask a question about your documents:")
@@ -107,12 +117,12 @@ def main():
                         st.write(response)
                         
                     except Exception as e:
-                        st.error(f"An error occurred: {str(e)}")
+                        st.error(f"Error generating response: {str(e)}")
             else:
                 st.warning("Please enter a question.")
     
     except Exception as e:
-        st.error(f"Error initializing components: {str(e)}")
+        st.error(f"Error during initialization: {str(e)}")
 
 if __name__ == "__main__":
     main()
