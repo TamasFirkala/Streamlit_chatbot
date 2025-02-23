@@ -1,11 +1,10 @@
 import streamlit as st
 import openai
-import pinecone  # Changed this line
+import pinecone
 from llama_index.embeddings.openai import OpenAIEmbedding
 from llama_index.vector_stores.pinecone import PineconeVectorStore
 from llama_index.core import VectorStoreIndex
 from llama_index.core import ServiceContext
-
 
 st.title("API Connection Test")
 
@@ -40,21 +39,21 @@ with st.expander("Test Pinecone Connection"):
         # Test Pinecone connection
         if st.button("Test Pinecone API"):
             pinecone.init(
-    api_key=st.secrets["pinecone_api_key"],
-    environment=st.secrets["pinecone_environment"]  # You'll need to add this to your secrets
-)
-         
+                api_key=st.secrets["pinecone_api_key"],
+                environment=st.secrets["pinecone_environment"]
+            )
+
             # Try to get index information
             index_name = st.secrets["pinecone_index_name"]
-            index_info = pc.describe_index(index_name)
+            index = pinecone.Index(index_name)
+            index_stats = index.describe_index_stats()
 
             st.success(f"""
                 Pinecone connection successful!
                 - API key is valid
                 - Index '{index_name}' exists
-                - Index dimension: {index_info.dimension}
-                - Index metric: {index_info.metric}
-                - Index pods: {index_info.pod_type}
+                - Total vectors: {index_stats.total_vector_count}
+                - Dimension: {index_stats.dimension}
             """)
 
     except Exception as e:
@@ -68,7 +67,8 @@ with st.expander("Check Configured Secrets"):
     secrets_status = {
         "OPENAI_API_KEY": "openai_api_key" in st.secrets,
         "PINECONE_API_KEY": "pinecone_api_key" in st.secrets,
-        "PINECONE_INDEX_NAME": "pinecone_index_name" in st.secrets
+        "PINECONE_INDEX_NAME": "pinecone_index_name" in st.secrets,
+        "PINECONE_ENVIRONMENT": "pinecone_environment" in st.secrets
     }
     
     for secret_name, exists in secrets_status.items():
@@ -87,9 +87,12 @@ with st.expander("Test LlamaIndex-Pinecone Connection"):
                 api_key=st.secrets["openai_api_key"]
             )
             
-            pc = Pinecone(api_key=st.secrets["pinecone_api_key"])
+            pinecone.init(
+                api_key=st.secrets["pinecone_api_key"],
+                environment=st.secrets["pinecone_environment"]
+            )
             index_name = st.secrets["pinecone_index_name"]
-            pinecone_index = pc.Index(index_name)
+            pinecone_index = pinecone.Index(index_name)
             
             # Create vector store
             vector_store = PineconeVectorStore(
@@ -115,7 +118,7 @@ with st.expander("Test LlamaIndex-Pinecone Connection"):
                 LlamaIndex-Pinecone connection successful!
                 - Vector store connected
                 - Number of vectors in index: {stats.total_vector_count}
-                - Dimension of vectors: {stats.dimension}
+                - Dimension: {stats.dimension}
                 
                 Try a test query below:
             """)
@@ -136,5 +139,3 @@ st.markdown("""
 2. Check the configured secrets to ensure all required keys are present
 3. If you see any errors, verify your API keys and index name in the Streamlit secrets
 """)
-
-
