@@ -62,7 +62,7 @@ with st.expander("Check Configured Secrets"):
     secrets_status = {
         "OPENAI_API_KEY": "openai_api_key" in st.secrets,
         "PINECONE_API_KEY": "pinecone_api_key" in st.secrets,
-        "PINECONE_INDEX_NAME": "pinecpne_api_key" in st.secrets
+        "PINECONE_INDEX_NAME": "pinecone_api_key" in st.secrets
     }
     
     for secret_name, exists in secrets_status.items():
