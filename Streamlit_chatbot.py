@@ -36,10 +36,10 @@ with st.expander("Test Pinecone Connection"):
     try:
         # Test Pinecone connection
         if st.button("Test Pinecone API"):
-            pc = Pinecone(api_key=st.secrets["pinecone_api_key"])
+            pc = Pinecone(api_key=st.secrets["pinecone_index_name"])
 
             # Try to get index information
-            index_name = st.secrets["pinecone_api_key"]
+            index_name = st.secrets["pinecone_index_name"]
             index_info = pc.describe_index(index_name)
 
             st.success(f"""
@@ -62,7 +62,7 @@ with st.expander("Check Configured Secrets"):
     secrets_status = {
         "OPENAI_API_KEY": "openai_api_key" in st.secrets,
         "PINECONE_API_KEY": "pinecone_api_key" in st.secrets,
-        "PINECONE_INDEX_NAME": "pinecone_api_key" in st.secrets
+        "PINECONE_INDEX_NAME": "pinecone_index_name" in st.secrets
     }
     
     for secret_name, exists in secrets_status.items():
