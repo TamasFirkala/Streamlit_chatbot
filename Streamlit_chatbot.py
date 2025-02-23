@@ -123,6 +123,19 @@ with st.expander("Test LlamaIndex-Pinecone Connection"):
             # Add a simple query interface
             test_query = st.text_input("Enter a test query:", "What is this document about?")
             if st.button("Run Query"):
+
+                from llama_index.core import SimpleDirectoryReader, VectorStoreIndex, Settings
+                from llama_index.llms.openai import OpenAI
+
+                #Choosing large language model
+                Settings.llm = OpenAI(temperature=0.2, model="gpt-4-1106-preview")
+
+                #generating answer
+            
+                query_engine = vector_index.as_query_engine()
+                response = query_engine.query(test_query)
+            
+                
                 response = query_engine.query(test_query)
                 st.write("Response:", response)
 
