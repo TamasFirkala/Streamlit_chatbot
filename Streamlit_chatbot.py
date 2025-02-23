@@ -1,103 +1,82 @@
+                                                                                                                                                                   test_apis_streaml.py                                                                                                                                                                                 
 import streamlit as st
-import pinecone  # Changed from 'from pinecone import Pinecone'
-from llama_index.core import VectorStoreIndex
-from llama_index.vector_stores.pinecone import PineconeVectorStore
-from llama_index.embeddings.openai import OpenAIEmbedding
-from llama_index.llms.openai import OpenAI
 import openai
+from pinecone import Pinecone
+from llama_index.embeddings.openai import OpenAIEmbedding
 
-# Page configuration
-st.set_page_config(
-    page_title="Document Q&A",
-    page_icon="💬"
-)
+st.title("API Connection Test")
 
-# Initialize all components together
-@st.cache_resource
-def init_components():
-    # Set OpenAI API key
-    openai.api_key = st.secrets["openai_api_key"]
-    
-    # Initialize LLM
-    llm = OpenAI(
-        api_key=st.secrets["openai_api_key"],
-        temperature=0.2,
-        model="gpt-4-1106-preview"
-    )
-    
-    # Initialize embedding model
-    embed_model = OpenAIEmbedding(
-        api_key=st.secrets["openai_api_key"],
-        model_name="text-embedding-3-small",
-        dimensions=384
-    )
-    
-    # Initialize Pinecone
-    pinecone.init(
-        api_key=st.secrets["pinecone_api_key"]
-    )
-    
-    # Get the index
-    pinecone_index = pinecone.Index(st.secrets["pinecone_index_name"])
-    
-    # Create vector store
-    vector_store = PineconeVectorStore(
-        pinecone_index=pinecone_index,
-        dimension=384
-    )
-    
-    # Create index from vector store
-    index = VectorStoreIndex.from_vector_store(
-        vector_store,
-        embed_model=embed_model
-    )
-    
-    # Create query engine
-    query_engine = index.as_query_engine()
-    
-    return llm, embed_model, query_engine
-
-def main():
-    st.title("💬 Document Q&A")
-    
-    # Display current configuration
-    with st.expander("Configuration Status"):
-        st.write("Checking configuration...")
-        if "openai_api_key" in st.secrets:
-            st.write("✅ OpenAI API Key configured")
-        if "pinecone_api_key" in st.secrets:
-            st.write("✅ Pinecone API Key configured")
-        if "pinecone_index_name" in st.secrets:
-            st.write(f"📍 Pinecone Index: {st.secrets['pinecone_index_name']}")
-    
+# Add expanders for each test
+with st.expander("Test OpenAI Connection"):
     try:
-        # Initialize all components
-        with st.spinner("Initializing components..."):
-            llm, embed_model, query_engine = init_components()
-            st.success("All components initialized successfully!")
-        
-        # Create the question input
-        question = st.text_input("Ask a question about your documents:")
-        
-        if st.button("Get Answer"):
-            if question:
-                with st.spinner("Generating answer..."):
-                    try:
-                        # Get response from query engine
-                        response = query_engine.query(question)
-                        
-                        # Display response
-                        st.markdown("### Answer:")
-                        st.write(response)
-                        
-                    except Exception as e:
-                        st.error(f"Error generating response: {str(e)}")
-            else:
-                st.warning("Please enter a question.")
-    
-    except Exception as e:
-        st.error(f"Error during initialization: {str(e)}")
-        st.error("Please check your API keys and configurations.")
+        # Test OpenAI connection
+        if st.button("Test OpenAI API"):
+            openai.api_key = st.secrets["openai_api_key"]
 
-if __name__ == "__main__":
-    main()
+            # Try to create a simple embedding
+            embed_model = OpenAIEmbedding(
+                model_name="text-embedding-3-small",
+                dimensions=384,
+                api_key=st.secrets["openai_api_key"]
+            )
+             
+            test_embedding = embed_model.get_text_embedding("Hello, world!")
+
+            st.success(f"""
+                OpenAI connection successful!
+                - API key is valid
+                - Embedding model working
+                - Embedding dimension: {len(test_embedding)}
+            """)
+
+    except Exception as e:
+        st.error(f"OpenAI API Error: {str(e)}")
+
+with st.expander("Test Pinecone Connection"):
+    try:
+        # Test Pinecone connection
+        if st.button("Test Pinecone API"):
+            pc = Pinecone(api_key=st.secrets["pinecone_api_key"])
+
+            # Try to get index information
+            index_name = st.secrets["pinecone_api_key"]
+            index_info = pc.describe_index(index_name)
+
+            st.success(f"""
+                Pinecone connection successful!
+                - API key is valid
+                - Index '{index_name}' exists
+                - Index dimension: {index_info.dimension}
+                - Index metric: {index_info.metric}
+                - Index pods: {index_info.pod_type}
+            """)
+
+    except Exception as e:
+        st.error(f"Pinecone API Error: {str(e)}")
+
+# Display current secrets (without showing actual values)
+with st.expander("Check Configured Secrets"):
+    st.write("Checking for required secrets...")
+    
+    # Check if each required secret exists
+    secrets_status = {
+        "OPENAI_API_KEY": "openai_api_key" in st.secrets,
+        "PINECONE_API_KEY": "pinecone_api_key" in st.secrets,
+        "PINECONE_INDEX_NAME": "pinecpne_api_key" in st.secrets
+    }
+    
+    for secret_name, exists in secrets_status.items():
+        if exists:
+            st.success(f"✅ {secret_name} is configured")
+        else:
+            st.error(f"❌ {secret_name} is missing")
+
+st.markdown("---")
+st.markdown("""
+### How to use:
+1. Click each test button to verify the corresponding API connection
+2. Check the configured secrets to ensure all required keys are present
+3. If you see any errors, verify your API keys and index name in the Streamlit secrets
+""")
+
+
