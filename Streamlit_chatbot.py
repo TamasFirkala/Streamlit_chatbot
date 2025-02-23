@@ -3,8 +3,10 @@ import openai
 from pinecone import Pinecone
 from llama_index.embeddings.openai import OpenAIEmbedding
 from llama_index.vector_stores.pinecone import PineconeVectorStore
-from llama_index import VectorStoreIndex
-from llama_index.service_context import ServiceContext
+from llama_index.core import VectorStoreIndex  # Changed this line
+from llama_index.core import ServiceContext    # Changed this line
+
+
 st.title("API Connection Test")
 
 # Add expanders for each test
