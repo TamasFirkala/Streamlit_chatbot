@@ -4,7 +4,7 @@ from llama_index.core import VectorStoreIndex
 from llama_index.vector_stores.pinecone import PineconeVectorStore
 from llama_index.embeddings.openai import OpenAIEmbedding
 from llama_index.llms.openai import OpenAI
-import openai  # Add this import
+import openai
 
 # Page configuration
 st.set_page_config(
@@ -12,95 +12,65 @@ st.set_page_config(
     page_icon="💬"
 )
 
-# Check for required secrets
-def check_secrets():
-    required_secrets = [
-        "openai_api_key",
-        "pinecone_api_key",
-        "pinecone_index_name"
-    ]
-    
-    missing_secrets = [secret for secret in required_secrets if secret not in st.secrets]
-    
-    if missing_secrets:
-        st.error(f"Missing required secrets: {', '.join(missing_secrets)}")
-        st.write("Please add these secrets in your Streamlit configuration.")
-        st.stop()
-
-# Initialize OpenAI
+# Initialize all components together
 @st.cache_resource
-def init_openai():
+def init_components():
+    # Set OpenAI API key
     openai.api_key = st.secrets["openai_api_key"]
     
-    return OpenAI(
+    # Initialize LLM
+    llm = OpenAI(
         api_key=st.secrets["openai_api_key"],
         temperature=0.2,
         model="gpt-4-1106-preview"
     )
-
-# Initialize embedding model
-@st.cache_resource
-def init_embeddings():
-    return OpenAIEmbedding(
+    
+    # Initialize embedding model
+    embed_model = OpenAIEmbedding(
         api_key=st.secrets["openai_api_key"],
         model_name="text-embedding-3-small",
         dimensions=384
     )
-
-# Initialize Pinecone and create query engine
-@st.cache_resource
-def init_query_engine(embed_model):
-    try:
-        # Initialize Pinecone
-        pc = Pinecone(api_key=st.secrets["pinecone_api_key"])
-        
-        # Get the index
-        pinecone_index = pc.Index(st.secrets["pinecone_index_name"])
-        
-        # Create vector store
-        vector_store = PineconeVectorStore(
-            pinecone_index=pinecone_index,
-            dimension=384
-        )
-        
-        # Create index from vector store
-        index = VectorStoreIndex.from_vector_store(
-            vector_store,
-            embed_model=embed_model
-        )
-        
-        return index.as_query_engine()
     
-    except Exception as e:
-        st.error(f"Error initializing Pinecone: {str(e)}")
-        st.write("Please check your Pinecone configuration.")
-        raise e
+    # Initialize Pinecone
+    pc = Pinecone(api_key=st.secrets["pinecone_api_key"])
+    pinecone_index = pc.Index(st.secrets["pinecone_index_name"])
+    
+    # Create vector store
+    vector_store = PineconeVectorStore(
+        pinecone_index=pinecone_index,
+        dimension=384
+    )
+    
+    # Create index from vector store
+    index = VectorStoreIndex.from_vector_store(
+        vector_store,
+        embed_model=embed_model
+    )
+    
+    # Create query engine
+    query_engine = index.as_query_engine()
+    
+    return llm, embed_model, query_engine
 
-# Main app
 def main():
     st.title("💬 Document Q&A")
     
-    # Check for required secrets first
-    check_secrets()
-    
-    # Display current configuration (without showing actual keys)
+    # Display current configuration
     with st.expander("Configuration Status"):
-        st.write("✅ OpenAI API Key configured")
-        st.write("✅ Pinecone API Key configured")
-        st.write(f"📍 Pinecone Index: {st.secrets['pinecone_index_name']}")
+        st.write("Checking configuration...")
+        if "openai_api_key" in st.secrets:
+            st.write("✅ OpenAI API Key configured")
+        if "pinecone_api_key" in st.secrets:
+            st.write("✅ Pinecone API Key configured")
+        if "pinecone_index_name" in st.secrets:
+            st.write(f"📍 Pinecone Index: {st.secrets['pinecone_index_name']}")
     
     try:
-        # Initialize OpenAI first
-        llm = init_openai()
-        st.write("OpenAI initialized successfully")
-        
-        # Initialize embeddings
-        embed_model = init_embeddings()
-        st.write("Embeddings initialized successfully")
-        
-        # Initialize query engine with embeddings
-        query_engine = init_query_engine(embed_model)
-        st.write("Query engine initialized successfully")
+        # Initialize all components
+        with st.spinner("Initializing components..."):
+            llm, embed_model, query_engine = init_components()
+            st.success("All components initialized successfully!")
         
         # Create the question input
         question = st.text_input("Ask a question about your documents:")
@@ -123,6 +93,7 @@ def main():
     
     except Exception as e:
         st.error(f"Error during initialization: {str(e)}")
+        st.error("Please check your API keys and configurations.")
 
 if __name__ == "__main__":
     main()
