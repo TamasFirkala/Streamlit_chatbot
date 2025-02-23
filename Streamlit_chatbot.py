@@ -174,7 +174,7 @@ st.set_page_config(
 )
 
 # Connecting OpenAI API
-openai.api_key = st.secrets["api_secret"]
+openai.api_key = st.secrets["openai_api_key"]
 
 # Create tabs for main interface and paper information
 tab1, tab2 = st.tabs(["Ask Questions", "Research Papers"])
