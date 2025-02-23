@@ -1,5 +1,5 @@
 import streamlit as st
-from pinecone import Pinecone
+import pinecone  # Changed from 'from pinecone import Pinecone'
 from llama_index.core import VectorStoreIndex
 from llama_index.vector_stores.pinecone import PineconeVectorStore
 from llama_index.embeddings.openai import OpenAIEmbedding
@@ -33,8 +33,12 @@ def init_components():
     )
     
     # Initialize Pinecone
-    pc = Pinecone(api_key=st.secrets["pinecone_api_key"])
-    pinecone_index = pc.Index(st.secrets["pinecone_index_name"])
+    pinecone.init(
+        api_key=st.secrets["pinecone_api_key"]
+    )
+    
+    # Get the index
+    pinecone_index = pinecone.Index(st.secrets["pinecone_index_name"])
     
     # Create vector store
     vector_store = PineconeVectorStore(
