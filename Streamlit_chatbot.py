@@ -1,10 +1,20 @@
 import streamlit as st
 import openai
-from pinecone import Pinecone as PineconeClient
+import pinecone
 from llama_index.embeddings.openai import OpenAIEmbedding
 from llama_index.vector_stores.pinecone import PineconeVectorStore
 from llama_index.core import VectorStoreIndex
 from llama_index.core import ServiceContext
+from llama_index.llms import OpenAI
+from llama_index.core import Settings
+
+# Global settings
+Settings.llm = OpenAI(model="gpt-3.5-turbo", api_key=st.secrets["openai_api_key"])
+Settings.embed_model = OpenAIEmbedding(
+    model_name="text-embedding-3-small",
+    dimensions=384,
+    api_key=st.secrets["openai_api_key"]
+)
 
 st.title("API Connection Test")
 
@@ -38,22 +48,22 @@ with st.expander("Test Pinecone Connection"):
     try:
         # Test Pinecone connection
         if st.button("Test Pinecone API"):
-            # Initialize Pinecone client
-            pc = PineconeClient(
+            pinecone.init(
                 api_key=st.secrets["pinecone_api_key"],
                 environment=st.secrets["pinecone_environment"]
             )
 
             # Try to get index information
             index_name = st.secrets["pinecone_index_name"]
-            index_info = pc.describe_index(index_name)
+            index = pinecone.Index(index_name)
+            index_stats = index.describe_index_stats()
 
             st.success(f"""
                 Pinecone connection successful!
                 - API key is valid
                 - Index '{index_name}' exists
-                - Dimension: {index_info.dimension}
-                - Metric: {index_info.metric}
+                - Total vectors: {index_stats.total_vector_count}
+                - Dimension: {index_stats.dimension}
             """)
 
     except Exception as e:
@@ -87,24 +97,35 @@ with st.expander("Test LlamaIndex-Pinecone Connection"):
                 api_key=st.secrets["openai_api_key"]
             )
             
-            # Initialize Pinecone client
-            pc = PineconeClient(
+            # Initialize OpenAI LLM
+            llm = OpenAI(
+                model="gpt-3.5-turbo",
+                temperature=0.1,
+                api_key=st.secrets["openai_api_key"]
+            )
+            
+            pinecone.init(
                 api_key=st.secrets["pinecone_api_key"],
                 environment=st.secrets["pinecone_environment"]
             )
-            
             index_name = st.secrets["pinecone_index_name"]
-            pinecone_index = pc.Index(index_name)
+            pinecone_index = pinecone.Index(index_name)
             
             # Create vector store
             vector_store = PineconeVectorStore(
                 pinecone_index=pinecone_index
             )
             
-            # Create vector store index with embed_model directly
+            # Create service context with both embedding model and LLM
+            service_context = ServiceContext.from_defaults(
+                llm=llm,
+                embed_model=embed_model
+            )
+            
+            # Create vector store index
             vector_index = VectorStoreIndex.from_vector_store(
                 vector_store,
-                embed_model=embed_model
+                service_context=service_context
             )
             
             # Simple test query to verify connection
@@ -114,8 +135,8 @@ with st.expander("Test LlamaIndex-Pinecone Connection"):
             st.success(f"""
                 LlamaIndex-Pinecone connection successful!
                 - Vector store connected
-                - Index statistics retrieved
-                - Connection verified
+                - Number of vectors in index: {stats.total_vector_count}
+                - Dimension: {stats.dimension}
                 
                 Try a test query below:
             """)
@@ -123,21 +144,9 @@ with st.expander("Test LlamaIndex-Pinecone Connection"):
             # Add a simple query interface
             test_query = st.text_input("Enter a test query:", "What is this document about?")
             if st.button("Run Query"):
-
-                from llama_index.core import SimpleDirectoryReader, VectorStoreIndex, Settings
-                from llama_index.llms.openai import OpenAI
-
-                #Choosing large language model
-                Settings.llm = OpenAI(temperature=0.2, model="gpt-4-1106-preview")
-
-                #generating answer
-            
-                query_engine = vector_index.as_query_engine()
-                response = query_engine.query(test_query)
-            
-                
-                response = query_engine.query(test_query)
-                st.write("Response:", response)
+                with st.spinner("Generating response..."):
+                    response = query_engine.query(test_query)
+                    st.write("Response:", response)
 
     except Exception as e:
         st.error(f"LlamaIndex-Pinecone Integration Error: {str(e)}")
