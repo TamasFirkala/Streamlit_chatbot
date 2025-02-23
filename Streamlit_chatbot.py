@@ -1,6 +1,6 @@
 import streamlit as st
 import openai
-import pinecone
+from pinecone import Pinecone as PineconeClient
 from llama_index.embeddings.openai import OpenAIEmbedding
 from llama_index.vector_stores.pinecone import PineconeVectorStore
 from llama_index.core import VectorStoreIndex
