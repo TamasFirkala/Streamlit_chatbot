@@ -1,6 +1,6 @@
 import streamlit as st
 import openai
-import pinecone
+from pinecone import Pinecone as PineconeClient
 from llama_index.embeddings.openai import OpenAIEmbedding
 from llama_index.vector_stores.pinecone import PineconeVectorStore
 from llama_index.core import VectorStoreIndex
@@ -38,22 +38,22 @@ with st.expander("Test Pinecone Connection"):
     try:
         # Test Pinecone connection
         if st.button("Test Pinecone API"):
-            pinecone.init(
+            # Initialize Pinecone client
+            pc = PineconeClient(
                 api_key=st.secrets["pinecone_api_key"],
                 environment=st.secrets["pinecone_environment"]
             )
 
             # Try to get index information
             index_name = st.secrets["pinecone_index_name"]
-            index = pinecone.Index(index_name)
-            index_stats = index.describe_index_stats()
+            index_info = pc.describe_index(index_name)
 
             st.success(f"""
                 Pinecone connection successful!
                 - API key is valid
                 - Index '{index_name}' exists
-                - Total vectors: {index_stats.total_vector_count}
-                - Dimension: {index_stats.dimension}
+                - Dimension: {index_info.dimension}
+                - Metric: {index_info.metric}
             """)
 
     except Exception as e:
@@ -87,27 +87,24 @@ with st.expander("Test LlamaIndex-Pinecone Connection"):
                 api_key=st.secrets["openai_api_key"]
             )
             
-            pinecone.init(
+            # Initialize Pinecone client
+            pc = PineconeClient(
                 api_key=st.secrets["pinecone_api_key"],
                 environment=st.secrets["pinecone_environment"]
             )
+            
             index_name = st.secrets["pinecone_index_name"]
-            pinecone_index = pinecone.Index(index_name)
+            pinecone_index = pc.Index(index_name)
             
             # Create vector store
             vector_store = PineconeVectorStore(
                 pinecone_index=pinecone_index
             )
             
-            # Create service context
-            service_context = ServiceContext.from_defaults(
-                embed_model=embed_model
-            )
-            
-            # Create vector store index
+            # Create vector store index with embed_model directly
             vector_index = VectorStoreIndex.from_vector_store(
                 vector_store,
-                service_context=service_context
+                embed_model=embed_model
             )
             
             # Simple test query to verify connection
@@ -117,8 +114,8 @@ with st.expander("Test LlamaIndex-Pinecone Connection"):
             st.success(f"""
                 LlamaIndex-Pinecone connection successful!
                 - Vector store connected
-                - Number of vectors in index: {stats.total_vector_count}
-                - Dimension: {stats.dimension}
+                - Index statistics retrieved
+                - Connection verified
                 
                 Try a test query below:
             """)
@@ -126,6 +123,19 @@ with st.expander("Test LlamaIndex-Pinecone Connection"):
             # Add a simple query interface
             test_query = st.text_input("Enter a test query:", "What is this document about?")
             if st.button("Run Query"):
+
+                from llama_index.core import SimpleDirectoryReader, VectorStoreIndex, Settings
+                from llama_index.llms.openai import OpenAI
+
+                #Choosing large language model
+                Settings.llm = OpenAI(temperature=0.2, model="gpt-4-1106-preview")
+
+                #generating answer
+            
+                query_engine = vector_index.as_query_engine()
+                response = query_engine.query(test_query)
+            
+                
                 response = query_engine.query(test_query)
                 st.write("Response:", response)
 
