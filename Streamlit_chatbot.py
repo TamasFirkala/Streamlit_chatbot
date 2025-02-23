@@ -1,10 +1,15 @@
+
 import openai
 import os
 import streamlit as st
-from llama_index.core import SimpleDirectoryReader, VectorStoreIndex, Settings
-from llama_index.llms.openai import OpenAI
-import json
 from datetime import datetime
+from dotenv import load_dotenv
+from llama_index.core import VectorStoreIndex, Settings
+from llama_index.vector_stores.pinecone import PineconeVectorStore
+from llama_index.llms.openai import OpenAI
+from llama_index.embeddings.openai import OpenAIEmbedding
+from llama_index.core.node_parser import SimpleNodeParser
+from pinecone import Pinecone
 
 # Initialize session state for chat history
 if 'chat_history' not in st.session_state:
@@ -115,6 +120,47 @@ PAPERS_INFO = {
     }
 }
 
+
+def initialize_pinecone():
+    """Initialize Pinecone and create query engine"""
+    # Load environment variables from streamlit secrets
+    openai_api_key = st.secrets["OPENAI_API_KEY"]
+    pinecone_api_key = st.secrets["PINECONE_API_KEY"]
+    index_name = st.secrets["PINECONE_INDEX_NAME"]
+
+    # Initialize embedding model
+    embed_model = OpenAIEmbedding(
+        model_name="text-embedding-3-small",
+        dimensions=384,
+        api_key=openai_api_key
+    )
+
+    # Initialize LLM
+    llm = OpenAI(temperature=0.2, model="gpt-4-1106-preview", api_key=openai_api_key)
+
+    # Update global settings
+    Settings.embed_model = embed_model
+    Settings.llm = llm
+    Settings.node_parser = SimpleNodeParser.from_defaults()
+
+    # Initialize Pinecone
+    pc = Pinecone(api_key=pinecone_api_key)
+    pinecone_index = pc.Index(index_name)
+
+    # Create vector store
+    vector_store = PineconeVectorStore(
+        pinecone_index=pinecone_index,
+        dimension=384
+    )
+
+    # Create index and query engine
+    index = VectorStoreIndex.from_vector_store(
+        vector_store,
+        embed_model=embed_model
+    )
+
+    return index.as_query_engine()
+
 def save_to_history(question, answer):
     """Save Q&A to session state chat history"""
     st.session_state.chat_history.append({
@@ -143,7 +189,6 @@ def display_paper_info(paper_info):
     **Publication Details:**
     """)
     
-    # Display publication info if available
     if 'publication_info' in paper_info:
         info = paper_info['publication_info']
         if 'issn_online' in info:
@@ -155,7 +200,6 @@ def display_paper_info(paper_info):
         if 'published_date' in info:
             st.markdown(f"- Published: {info['published_date']}")
 
-    # Display author affiliation if available
     if 'author_affiliation' in paper_info:
         st.markdown("**Author Affiliation:**")
         aff = paper_info['author_affiliation']
@@ -173,9 +217,6 @@ st.set_page_config(
     layout="wide"
 )
 
-# Connecting OpenAI API
-openai.api_key = st.secrets["api_secret"]
-
 # Create tabs for main interface and paper information
 tab1, tab2 = st.tabs(["Ask Questions", "Research Papers"])
 
@@ -184,7 +225,6 @@ with tab1:
     main_col, history_col = st.columns([2, 1])
 
     with main_col:
-        # Title and description
         st.title("Climate Change Research Assistant")
         st.markdown("""
         Ask questions about five specific scientific papers on climate change. 
@@ -192,33 +232,23 @@ with tab1:
         Check the 'Research Papers' tab to see details about the source documents.
         """)
 
-        # Question input
         query = st.text_input("What would you like to ask?", "")
 
-        # Submit button with error handling
         if st.button("Submit"):
             if not query.strip():
                 st.error("Please provide a search query.")
             else:
                 try:
-                    # Show loading spinner
                     with st.spinner('Processing your question...'):
-                        # Connecting large language model
-                        Settings.llm = OpenAI(temperature=0.2, model="gpt-4-1106-preview")
+                        # Initialize Pinecone and get query engine
+                        query_engine = initialize_pinecone()
                         
-                        # Loading and indexing data
-                        documents = SimpleDirectoryReader('./data').load_data()
-                        index = VectorStoreIndex.from_documents(documents)
-                        
-                        # Generating answer
-                        query_engine = index.as_query_engine()
+                        # Generate response
                         response = query_engine.query(query)
 
-                        # Display the response in a nice format
                         st.markdown("### Answer:")
                         st.markdown(f">{response}")
                         
-                        # Save to chat history
                         save_to_history(query, response)
 
                 except Exception as e:
@@ -227,12 +257,10 @@ with tab1:
     with history_col:
         st.markdown("### Chat History")
         
-        # Add a clear history button
         if st.button("Clear History"):
             st.session_state.chat_history = []
             st.rerun()
         
-        # Display chat history
         if st.session_state.chat_history:
             for i, qa in enumerate(reversed(st.session_state.chat_history)):
                 with st.expander(f"Q: {qa['question'][:50]}...", expanded=(i == 0)):
@@ -250,11 +278,9 @@ with tab2:
     Understanding their content will help you ask more specific questions.
     """)
     
-    # Display paper information in expandable sections
     for paper_id, info in PAPERS_INFO.items():
         with st.expander(f"📚 {info['title']}", expanded=False):
             display_paper_info(info)
-            # Add citation format
             st.markdown("**Suggested Citation:**")
             citation = f"{info['authors']}. ({info['year']}). {info['title']}. {info['journal']}, {info['volume']}, {info['pages']}."
             st.code(citation)
