@@ -6,7 +6,7 @@ from llama_index.vector_stores.pinecone import PineconeVectorStore
 from llama_index.core import VectorStoreIndex
 from llama_index.core import ServiceContext
 from llama_index.llms.openai import OpenAI
-from llama_index.core.settings import Settings
+from llama_index.core import Settings
 
 # Global settings
 Settings.llm = OpenAI(model="gpt-3.5-turbo", api_key=st.secrets["openai_api_key"])
@@ -104,6 +104,10 @@ with st.expander("Test LlamaIndex-Pinecone Connection"):
                 api_key=st.secrets["openai_api_key"]
             )
             
+            # Update Settings instead of using ServiceContext
+            Settings.llm = llm
+            Settings.embed_model = embed_model
+            
             pc = PineconeClient(
                 api_key=st.secrets["pinecone_api_key"],
                 environment=st.secrets["pinecone_environment"]
@@ -116,16 +120,9 @@ with st.expander("Test LlamaIndex-Pinecone Connection"):
                 pinecone_index=pinecone_index
             )
             
-            # Create service context with both embedding model and LLM
-            service_context = ServiceContext.from_defaults(
-                llm=llm,
-                embed_model=embed_model
-            )
-            
-            # Create vector store index
+            # Create vector store index without service_context
             vector_index = VectorStoreIndex.from_vector_store(
-                vector_store,
-                service_context=service_context
+                vector_store
             )
             
             # Simple test query to verify connection
