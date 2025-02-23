@@ -1,11 +1,10 @@
-
 import streamlit as st
 import openai
 from pinecone import Pinecone as PineconeClient
 from llama_index.embeddings.openai import OpenAIEmbedding
 from llama_index.vector_stores.pinecone import PineconeVectorStore
 from llama_index.core import VectorStoreIndex
-from llama_index import Settings
+from llama_index.core import ServiceContext
 
 st.title("API Connection Test")
 
@@ -102,13 +101,10 @@ with st.expander("Test LlamaIndex-Pinecone Connection"):
                 pinecone_index=pinecone_index
             )
             
-            # Configure settings
-            Settings.embed_model = embed_model
-            Settings.llm = None  # Set to None if you don't need LLM functionality
-            
-            # Create vector store index
+            # Create vector store index with embed_model directly
             vector_index = VectorStoreIndex.from_vector_store(
                 vector_store,
+                embed_model=embed_model
             )
             
             # Simple test query to verify connection
