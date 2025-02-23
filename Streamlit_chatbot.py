@@ -139,31 +139,36 @@ with st.expander("Test LlamaIndex-Pinecone Connection"):
             """)
             
             # Add a simple query interface
-            test_query = st.text_input("Enter a test query:", "What is this document about?")
-            if st.button("Run Query"):
-                with st.spinner("Generating response..."):
-                    try:
-                        response = query_engine.query(test_query)
-                        st.write("Raw Response Object:", type(response))  # Debug info
-                        st.write("Response Content:", str(response))
-                        
-                        # Try accessing different response attributes
-                        st.write("Response as string:", str(response))
-                        if hasattr(response, 'response'):
-                            st.write("Response.response:", response.response)
-                        if hasattr(response, 'text'):
-                            st.write("Response.text:", response.text)
-                        
-                        # Display source nodes if available
-                        if hasattr(response, 'source_nodes'):
-                            st.write("Source Nodes:")
-                            for node in response.source_nodes:
-                                st.write("- Source:", node.node.text[:200] + "...")
-                                
-                    except Exception as e:
-                        st.error(f"Error processing response: {str(e)}")
-                        st.write("Full error:", e)
+            col1, col2 = st.columns(2)
+            with col1:
+                test_query = st.text_input("Enter a test query:", "What is this document about?")
+            with col2:
+                query_button = st.button("Run Query", key="unique_query_button")
 
+            if query_button:  # Check if the query button was clicked
+                st.write("Button clicked, starting query...")  # Debug message
+                
+                try:
+                    st.write("Attempting to run query...")  # Debug message
+                    response = query_engine.query(test_query)
+                    st.write("Query completed!")  # Debug message
+                    
+                    # Display the response in multiple formats
+                    st.write("Raw response type:", type(response))
+                    st.write("Response as string:", str(response))
+                    
+                    if hasattr(response, 'response'):
+                        st.write("Response.response:", response.response)
+                    
+                    if hasattr(response, 'text'):
+                        st.write("Response.text:", response.text)
+                        
+                except Exception as e:
+                    st.error(f"Error during query execution: {str(e)}")
+                    st.write("Full error details:", e)
+                    import traceback
+                    st.write("Traceback:", traceback.format_exc())
+                    
     except Exception as e:
         st.error(f"LlamaIndex-Pinecone Integration Error: {str(e)}")
 
