@@ -3,6 +3,9 @@ import streamlit as st
 import openai
 from pinecone import Pinecone
 from llama_index.embeddings.openai import OpenAIEmbedding
+from llama_index.vector_stores import PineconeVectorStore
+from llama_index import VectorStoreIndex
+from llama_index.service_context import ServiceContext
 
 st.title("API Connection Test")
 
@@ -70,6 +73,58 @@ with st.expander("Check Configured Secrets"):
             st.success(f"✅ {secret_name} is configured")
         else:
             st.error(f"❌ {secret_name} is missing")
+
+with st.expander("Test LlamaIndex-Pinecone Connection"):
+    try:
+        if st.button("Test LlamaIndex-Pinecone Integration"):
+            # Initialize components
+            embed_model = OpenAIEmbedding(
+                model_name="text-embedding-3-small",
+                dimensions=384,
+                api_key=st.secrets["openai_api_key"]
+            )
+            
+            pc = Pinecone(api_key=st.secrets["pinecone_api_key"])
+            index_name = st.secrets["pinecone_index_name"]
+            pinecone_index = pc.Index(index_name)
+            
+            # Create vector store
+            vector_store = PineconeVectorStore(
+                pinecone_index=pinecone_index
+            )
+            
+            # Create service context
+            service_context = ServiceContext.from_defaults(
+                embed_model=embed_model
+            )
+            
+            # Create vector store index
+            vector_index = VectorStoreIndex.from_vector_store(
+                vector_store,
+                service_context=service_context
+            )
+            
+            # Simple test query to verify connection
+            query_engine = vector_index.as_query_engine()
+            stats = pinecone_index.describe_index_stats()
+            
+            st.success(f"""
+                LlamaIndex-Pinecone connection successful!
+                - Vector store connected
+                - Number of vectors in index: {stats.total_vector_count}
+                - Dimension of vectors: {stats.dimension}
+                
+                Try a test query below:
+            """)
+            
+            # Add a simple query interface
+            test_query = st.text_input("Enter a test query:", "What is this document about?")
+            if st.button("Run Query"):
+                response = query_engine.query(test_query)
+                st.write("Response:", response)
+
+    except Exception as e:
+        st.error(f"LlamaIndex-Pinecone Integration Error: {str(e)}")
 
 st.markdown("---")
 st.markdown("""
