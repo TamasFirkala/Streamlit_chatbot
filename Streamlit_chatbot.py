@@ -143,7 +143,7 @@ with st.expander("Test LlamaIndex-Pinecone Connection"):
             if st.button("Run Query"):
                 with st.spinner("Generating response..."):
                     response = query_engine.query(test_query)
-                    st.write("Response:", response)
+                    st.success(response)
 
     except Exception as e:
         st.error(f"LlamaIndex-Pinecone Integration Error: {str(e)}")
