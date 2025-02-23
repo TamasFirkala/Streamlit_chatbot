@@ -5,7 +5,7 @@ from llama_index.embeddings.openai import OpenAIEmbedding
 from llama_index.vector_stores.pinecone import PineconeVectorStore
 from llama_index.core import VectorStoreIndex
 from llama_index.core import ServiceContext
-from llama_index.core import Document
+from llama_index.llms import OpenAI  # Added this but keeping original import structure
 
 st.title("API Connection Test")
 
@@ -87,6 +87,13 @@ with st.expander("Test LlamaIndex-Pinecone Connection"):
                 dimensions=384,
                 api_key=st.secrets["openai_api_key"]
             )
+
+            # Initialize OpenAI LLM
+            llm = OpenAI(
+                model="gpt-3.5-turbo",
+                temperature=0.1,
+                api_key=st.secrets["openai_api_key"]
+            )
             
             # Initialize Pinecone client
             pc = PineconeClient(
@@ -102,66 +109,63 @@ with st.expander("Test LlamaIndex-Pinecone Connection"):
                 pinecone_index=pinecone_index
             )
             
-            # Create vector store index with embed_model directly
+            # Create vector store index with embed_model and llm
             vector_index = VectorStoreIndex.from_vector_store(
                 vector_store,
-                embed_model=embed_model
+                embed_model=embed_model,
+                llm=llm
             )
             
-            # Get index stats
-            stats = pinecone_index.describe_index_stats()
-            
-            # Add a test document if the index is empty
-            if stats.total_vector_count == 0:
-                st.warning("Index is empty. Adding a test document...")
-                test_doc = Document(
-                    text="This is a test document. It contains information about artificial intelligence and machine learning. AI and ML are transforming various industries including healthcare, finance, and transportation. Machine learning models can analyze large datasets to identify patterns and make predictions. Artificial intelligence systems can perform tasks that typically require human intelligence, such as visual perception, speech recognition, and decision-making."
-                )
-                vector_index.insert(test_doc)
-                st.success("Test document added successfully!")
-                # Refresh stats after adding document
-                stats = pinecone_index.describe_index_stats()
-            
-            # Create query engine
+            # Simple test query to verify connection
             query_engine = vector_index.as_query_engine()
+            stats = pinecone_index.describe_index_stats()
             
             st.success(f"""
                 LlamaIndex-Pinecone connection successful!
                 - Vector store connected
-                - Number of vectors in index: {stats.total_vector_count}
+                - Index statistics retrieved
                 - Connection verified
+                - LLM model loaded (gpt-3.5-turbo)
                 
                 Try a test query below:
             """)
             
-            # Add a simple query interface
+            # Add a simple query interface with debugging
             test_query = st.text_input("Enter a test query:", "What is this document about?")
-            if st.button("Run Query"):
-                with st.spinner("Processing query..."):
-                    response = query_engine.query(test_query)
-                    
-                    # Create a dedicated area for the response
-                    st.markdown("### Query Response:")
-                    st.markdown("---")
-                    
-                    # Display the response in different formats
-                    st.markdown("**Response Text:**")
-                    st.write(str(response))
-                    
-                    # Display the raw response object
-                    st.markdown("**Raw Response Object:**")
-                    st.json({
-                        "response_text": str(response),
-                        "response_type": type(response).__name__,
-                    })
-                    
-                    # Optional: Display metadata if available
+            if st.button("Run Query", key="run_query_button"):
+                st.write("Executing query...")
+                
+                # Debug information before query
+                st.write("Pre-Query Debug Information:")
+                st.write(f"Query Engine Type: {type(query_engine)}")
+                st.write(f"Index Stats: {stats}")
+                st.write(f"Query Text: {test_query}")
+                st.write(f"LLM Model: {llm.model}")
+                
+                # Execute query
+                response = query_engine.query(test_query)
+                
+                # Display response
+                st.markdown("### Query Response:")
+                st.markdown(str(response))
+                
+                # Debug information after query
+                with st.expander("View Debug Information"):
+                    st.write("Post-Query Debug Information:")
+                    st.write(f"Response Type: {type(response)}")
+                    st.write(f"Raw Response: {response}")
+                    st.write(f"Response Attributes: {dir(response)}")
                     if hasattr(response, 'metadata'):
-                        st.markdown("**Metadata:**")
-                        st.json(response.metadata)
+                        st.write(f"Response Metadata: {response.metadata}")
+                    if hasattr(response, 'source_nodes'):
+                        st.write(f"Source Nodes: {response.source_nodes}")
+                    if hasattr(response, 'response'):
+                        st.write(f"Response Content: {response.response}")
 
     except Exception as e:
         st.error(f"LlamaIndex-Pinecone Integration Error: {str(e)}")
+        st.error("Full error details:")
+        st.exception(e)
 
 st.markdown("---")
 st.markdown("""
