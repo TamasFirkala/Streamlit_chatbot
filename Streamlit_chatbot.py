@@ -5,7 +5,7 @@ from llama_index.embeddings.openai import OpenAIEmbedding
 from llama_index.vector_stores.pinecone import PineconeVectorStore
 from llama_index.core import VectorStoreIndex
 from llama_index.core import ServiceContext
-from llama_index.llms import OpenAI
+from llama_index.llms.openai import OpenAI  # Changed import path
 from llama_index.core import Settings
 
 # Global settings
@@ -15,6 +15,7 @@ Settings.embed_model = OpenAIEmbedding(
     dimensions=384,
     api_key=st.secrets["openai_api_key"]
 )
+
 
 st.title("API Connection Test")
 
