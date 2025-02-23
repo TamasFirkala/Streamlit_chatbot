@@ -5,8 +5,6 @@ from llama_index.embeddings.openai import OpenAIEmbedding
 from llama_index.vector_stores.pinecone import PineconeVectorStore
 from llama_index.core import VectorStoreIndex
 from llama_index.core import ServiceContext
-#from llama_index.llms import OpenAI  # Added this but keeping original import structure
-from llama_index.llms.openai import OpenAI
 
 st.title("API Connection Test")
 
@@ -88,13 +86,6 @@ with st.expander("Test LlamaIndex-Pinecone Connection"):
                 dimensions=384,
                 api_key=st.secrets["openai_api_key"]
             )
-
-            # Initialize OpenAI LLM
-            llm = OpenAI(
-                model="gpt-3.5-turbo",
-                temperature=0.1,
-                api_key=st.secrets["openai_api_key"]
-            )
             
             # Initialize Pinecone client
             pc = PineconeClient(
@@ -110,11 +101,10 @@ with st.expander("Test LlamaIndex-Pinecone Connection"):
                 pinecone_index=pinecone_index
             )
             
-            # Create vector store index with embed_model and llm
+            # Create vector store index with embed_model directly
             vector_index = VectorStoreIndex.from_vector_store(
                 vector_store,
-                embed_model=embed_model,
-                llm=llm
+                embed_model=embed_model
             )
             
             # Simple test query to verify connection
@@ -126,47 +116,31 @@ with st.expander("Test LlamaIndex-Pinecone Connection"):
                 - Vector store connected
                 - Index statistics retrieved
                 - Connection verified
-                - LLM model loaded (gpt-3.5-turbo)
                 
                 Try a test query below:
             """)
             
-            # Add a simple query interface with debugging
+            # Add a simple query interface
             test_query = st.text_input("Enter a test query:", "What is this document about?")
-            if st.button("Run Query", key="run_query_button"):
-                st.write("Executing query...")
-                
-                # Debug information before query
-                st.write("Pre-Query Debug Information:")
-                st.write(f"Query Engine Type: {type(query_engine)}")
-                st.write(f"Index Stats: {stats}")
-                st.write(f"Query Text: {test_query}")
-                st.write(f"LLM Model: {llm.model}")
-                
-                # Execute query
+            if st.button("Run Query"):
+
+                from llama_index.core import SimpleDirectoryReader, VectorStoreIndex, Settings
+                from llama_index.llms.openai import OpenAI
+
+                #Choosing large language model
+                Settings.llm = OpenAI(temperature=0.2, model="gpt-4-1106-preview")
+
+                #generating answer
+            
+                query_engine = vector_index.as_query_engine()
                 response = query_engine.query(test_query)
+            
                 
-                # Display response
-                st.markdown("### Query Response:")
-                st.markdown(str(response))
-                
-                # Debug information after query
-                with st.expander("View Debug Information"):
-                    st.write("Post-Query Debug Information:")
-                    st.write(f"Response Type: {type(response)}")
-                    st.write(f"Raw Response: {response}")
-                    st.write(f"Response Attributes: {dir(response)}")
-                    if hasattr(response, 'metadata'):
-                        st.write(f"Response Metadata: {response.metadata}")
-                    if hasattr(response, 'source_nodes'):
-                        st.write(f"Source Nodes: {response.source_nodes}")
-                    if hasattr(response, 'response'):
-                        st.write(f"Response Content: {response.response}")
+                response = query_engine.query(test_query)
+                st.write("Response:", response)
 
     except Exception as e:
         st.error(f"LlamaIndex-Pinecone Integration Error: {str(e)}")
-        st.error("Full error details:")
-        st.exception(e)
 
 st.markdown("---")
 st.markdown("""
