@@ -124,9 +124,9 @@ PAPERS_INFO = {
 def initialize_pinecone():
     """Initialize Pinecone and create query engine"""
     # Load environment variables from streamlit secrets
-    openai_api_key = st.secrets["OPENAI_API_KEY"]
-    pinecone_api_key = st.secrets["PINECONE_API_KEY"]
-    index_name = st.secrets["PINECONE_INDEX_NAME"]
+    openai_api_key = st.secrets["openai_api_key"]
+    pinecone_api_key = st.secrets["pinecone_api_key"]
+    index_name = st.secrets["pinecone_index_name"]
 
     # Initialize embedding model
     embed_model = OpenAIEmbedding(
