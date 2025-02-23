@@ -6,7 +6,7 @@ from llama_index.vector_stores.pinecone import PineconeVectorStore
 from llama_index.core import VectorStoreIndex
 from llama_index.core import ServiceContext
 from llama_index.llms.openai import OpenAI
-from llama_index.core import Settings
+from llama_index.core.settings import Settings
 
 # Global settings
 Settings.llm = OpenAI(model="gpt-3.5-turbo", api_key=st.secrets["openai_api_key"])
