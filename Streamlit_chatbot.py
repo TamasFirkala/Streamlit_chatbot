@@ -1,10 +1,10 @@
 import streamlit as st
 import openai
-from pinecone import Pinecone
+import pinecone  # Changed this line
 from llama_index.embeddings.openai import OpenAIEmbedding
 from llama_index.vector_stores.pinecone import PineconeVectorStore
-from llama_index.core import VectorStoreIndex  # Changed this line
-from llama_index.core import ServiceContext    # Changed this line
+from llama_index.core import VectorStoreIndex
+from llama_index.core import ServiceContext
 
 
 st.title("API Connection Test")
@@ -39,8 +39,11 @@ with st.expander("Test Pinecone Connection"):
     try:
         # Test Pinecone connection
         if st.button("Test Pinecone API"):
-            pc = Pinecone(api_key=st.secrets["pinecone_api_key"])
-
+            pinecone.init(
+    api_key=st.secrets["pinecone_api_key"],
+    environment=st.secrets["pinecone_environment"]  # You'll need to add this to your secrets
+)
+         
             # Try to get index information
             index_name = st.secrets["pinecone_index_name"]
             index_info = pc.describe_index(index_name)
