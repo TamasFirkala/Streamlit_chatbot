@@ -5,7 +5,7 @@ from llama_index.embeddings.openai import OpenAIEmbedding
 from llama_index.vector_stores.pinecone import PineconeVectorStore
 from llama_index.core import VectorStoreIndex
 from llama_index.core import ServiceContext
-from llama_index.llms.openai import OpenAI  # Changed import path
+from llama_index.llms.openai import OpenAI
 from llama_index.core import Settings
 
 # Global settings
@@ -15,7 +15,6 @@ Settings.embed_model = OpenAIEmbedding(
     dimensions=384,
     api_key=st.secrets["openai_api_key"]
 )
-
 
 st.title("API Connection Test")
 
@@ -49,14 +48,14 @@ with st.expander("Test Pinecone Connection"):
     try:
         # Test Pinecone connection
         if st.button("Test Pinecone API"):
-            pinecone.init(
+            pc = PineconeClient(
                 api_key=st.secrets["pinecone_api_key"],
                 environment=st.secrets["pinecone_environment"]
             )
 
             # Try to get index information
             index_name = st.secrets["pinecone_index_name"]
-            index = pinecone.Index(index_name)
+            index = pc.Index(index_name)
             index_stats = index.describe_index_stats()
 
             st.success(f"""
@@ -105,12 +104,12 @@ with st.expander("Test LlamaIndex-Pinecone Connection"):
                 api_key=st.secrets["openai_api_key"]
             )
             
-            pinecone.init(
+            pc = PineconeClient(
                 api_key=st.secrets["pinecone_api_key"],
                 environment=st.secrets["pinecone_environment"]
             )
             index_name = st.secrets["pinecone_index_name"]
-            pinecone_index = pinecone.Index(index_name)
+            pinecone_index = pc.Index(index_name)
             
             # Create vector store
             vector_store = PineconeVectorStore(
