@@ -1,12 +1,10 @@
-                                                                                                                                                                                                                                                                                                                                                  
 import streamlit as st
 import openai
 from pinecone import Pinecone
 from llama_index.embeddings.openai import OpenAIEmbedding
-from llama_index.vector_stores import PineconeVectorStore
+from llama_index.vector_stores.pinecone import PineconeVectorStore
 from llama_index import VectorStoreIndex
 from llama_index.service_context import ServiceContext
-
 st.title("API Connection Test")
 
 # Add expanders for each test
