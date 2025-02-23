@@ -36,7 +36,7 @@ with st.expander("Test Pinecone Connection"):
     try:
         # Test Pinecone connection
         if st.button("Test Pinecone API"):
-            pc = Pinecone(api_key=st.secrets["pinecone_index_name"])
+            pc = Pinecone(api_key=st.secrets["pinecone_api_key"])
 
             # Try to get index information
             index_name = st.secrets["pinecone_index_name"]
