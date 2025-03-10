@@ -1,14 +1,18 @@
-import openai
-import os
 import streamlit as st
-from llama_index.core import SimpleDirectoryReader, VectorStoreIndex, Settings
+import openai
+from pinecone import Pinecone as PineconeClient
+from llama_index.embeddings.openai import OpenAIEmbedding
+from llama_index.vector_stores.pinecone import PineconeVectorStore
+from llama_index.core import VectorStoreIndex
+from llama_index.core import ServiceContext
 from llama_index.llms.openai import OpenAI
-import json
+from llama_index.core import Settings
+from dotenv import load_dotenv
+import os
 from datetime import datetime
 
-# Initialize session state for chat history
-if 'chat_history' not in st.session_state:
-    st.session_state.chat_history = []
+# Load environment variables
+load_dotenv()
 
 # Papers Information Dictionary
 PAPERS_INFO = {
@@ -115,6 +119,15 @@ PAPERS_INFO = {
     }
 }
 
+
+# Global settings
+Settings.llm = OpenAI(model="gpt-3.5-turbo", api_key=os.getenv("OPENAI_API_KEY"))
+Settings.embed_model = OpenAIEmbedding(
+    model_name="text-embedding-3-small",
+    dimensions=384,
+    api_key=os.getenv("OPENAI_API_KEY")
+)
+
 def save_to_history(question, answer):
     """Save Q&A to session state chat history"""
     st.session_state.chat_history.append({
@@ -173,74 +186,107 @@ st.set_page_config(
     layout="wide"
 )
 
-# Connecting OpenAI API
-openai.api_key = st.secrets["openai_api_key"]
+# Initialize session state for chat history
+if 'chat_history' not in st.session_state:
+    st.session_state.chat_history = []
 
 # Create tabs for main interface and paper information
 tab1, tab2 = st.tabs(["Ask Questions", "Research Papers"])
 
 with tab1:
-    # Create two columns: main content and chat history
-    main_col, history_col = st.columns([2, 1])
+    try:
+        # Initialize components
+        embed_model = OpenAIEmbedding(
+            model_name="text-embedding-3-small",
+            dimensions=384,
+            api_key=os.getenv("OPENAI_API_KEY")
+        )
+        
+        # Initialize OpenAI LLM
+        llm = OpenAI(
+            model="gpt-3.5-turbo",
+            temperature=0.1,
+            api_key=os.getenv("OPENAI_API_KEY")
+        )
+        
+        # Update Settings
+        Settings.llm = llm
+        Settings.embed_model = embed_model
+        
+        pc = PineconeClient(
+            api_key=os.getenv("PINECONE_API_KEY"),
+            environment=os.getenv("PINECONE_ENVIRONMENT")
+        )
+        index_name = os.getenv("PINECONE_INDEX_NAME")
+        pinecone_index = pc.Index(index_name)
+        
+        # Create vector store
+        vector_store = PineconeVectorStore(
+            pinecone_index=pinecone_index
+        )
+        
+        # Create vector store index
+        vector_index = VectorStoreIndex.from_vector_store(
+            vector_store
+        )
+        
+        # Create query engine
+        query_engine = vector_index.as_query_engine()
 
-    with main_col:
-        # Title and description
-        st.title("Climate Change Research Assistant")
-        st.markdown("""
-        Ask questions about five specific scientific papers on climate change. 
-        Your questions will be answered using the knowledge from these papers.
-        Check the 'Research Papers' tab to see details about the source documents.
-        """)
+        # Create two columns: main content and chat history
+        main_col, history_col = st.columns([2, 1])
 
-        # Question input
-        query = st.text_input("What would you like to ask?", "")
+        with main_col:
+            # Title and description
+            st.title("Climate Change Research Assistant")
+            st.markdown("""
+            Ask questions about the documents in the knowledge base. 
+            Check the 'Research Papers' tab to see details about the source documents.
+            """)
 
-        # Submit button with error handling
-        if st.button("Submit"):
-            if not query.strip():
-                st.error("Please provide a search query.")
+            # Question input
+            query = st.text_input("What would you like to ask?", "")
+
+            # Submit button with error handling
+            if st.button("Submit"):
+                if not query.strip():
+                    st.error("Please provide a search query.")
+                else:
+                    try:
+                        # Show loading spinner
+                        with st.spinner('Processing your question...'):
+                            response = query_engine.query(query)
+
+                            # Display the response in a nice format
+                            st.markdown("### Answer:")
+                            st.markdown(f">{response}")
+                            
+                            # Save to chat history
+                            save_to_history(query, response)
+
+                    except Exception as e:
+                        st.error(f"An error occurred: {str(e)}")
+
+        with history_col:
+            st.markdown("### Chat History")
+            
+            # Add a clear history button
+            if st.button("Clear History"):
+                st.session_state.chat_history = []
+                st.rerun()
+            
+            # Display chat history
+            if st.session_state.chat_history:
+                for i, qa in enumerate(reversed(st.session_state.chat_history)):
+                    with st.expander(f"Q: {qa['question'][:50]}...", expanded=(i == 0)):
+                        st.markdown(f"**Time:** {qa['timestamp']}")
+                        st.markdown(f"**Question:** {qa['question']}")
+                        st.markdown(f"**Answer:** {qa['answer']}")
             else:
-                try:
-                    # Show loading spinner
-                    with st.spinner('Processing your question...'):
-                        # Connecting large language model
-                        Settings.llm = OpenAI(temperature=0.2, model="gpt-4-1106-preview")
-                        
-                        # Loading and indexing data
-                        documents = SimpleDirectoryReader('./data').load_data()
-                        index = VectorStoreIndex.from_documents(documents)
-                        
-                        # Generating answer
-                        query_engine = index.as_query_engine()
-                        response = query_engine.query(query)
+                st.info("No questions asked yet. Try asking something!")
 
-                        # Display the response in a nice format
-                        st.markdown("### Answer:")
-                        st.markdown(f">{response}")
-                        
-                        # Save to chat history
-                        save_to_history(query, response)
-
-                except Exception as e:
-                    st.error(f"An error occurred: {str(e)}")
-
-    with history_col:
-        st.markdown("### Chat History")
-        
-        # Add a clear history button
-        if st.button("Clear History"):
-            st.session_state.chat_history = []
-            st.rerun()
-        
-        # Display chat history
-        if st.session_state.chat_history:
-            for i, qa in enumerate(reversed(st.session_state.chat_history)):
-                with st.expander(f"Q: {qa['question'][:50]}...", expanded=(i == 0)):
-                    st.markdown(f"**Time:** {qa['timestamp']}")
-                    st.markdown(f"**Question:** {qa['question']}")
-                    st.markdown(f"**Answer:** {qa['answer']}")
-        else:
-            st.info("No questions asked yet. Try asking something!")
+    except Exception as e:
+        st.error(f"Setup Error: {str(e)}")
 
 with tab2:
     st.title("Source Documents")
@@ -263,6 +309,6 @@ with tab2:
 st.markdown("---")
 st.markdown("""
 <div style='text-align: center'>
-    <p>Built with Streamlit | Using GPT-4 and LlamaIndex</p>
+    <p>Built with Streamlit | Using GPT-3.5-turbo and LlamaIndex</p>
 </div>
 """, unsafe_allow_html=True)
