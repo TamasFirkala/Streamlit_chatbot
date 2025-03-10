@@ -1,5 +1,6 @@
 import streamlit as st
 import os
+import json
 
 st.title("Pinecone API Test")
 
@@ -27,7 +28,14 @@ try:
     # Test if we can get index stats
     stats = index.describe_index_stats()
     st.success("✅ Pinecone V2 connection successful!")
-    st.json(stats)
+    
+    # Convert to dict first to ensure valid JSON
+    stats_dict = vars(stats) if hasattr(stats, '__dict__') else stats
+    if isinstance(stats_dict, dict):
+        st.write("Index Statistics:")
+        st.write(stats_dict)
+    else:
+        st.write("Raw Statistics:", stats)
     
 except ImportError:
     st.warning("V2 import failed, trying V1...")
@@ -40,7 +48,12 @@ except ImportError:
         # Test if we can get index stats
         stats = index.describe_index_stats()
         st.success("✅ Pinecone V1 connection successful!")
-        st.json(stats)
+        
+        if isinstance(stats, dict):
+            st.write("Index Statistics:")
+            st.write(stats)
+        else:
+            st.write("Raw Statistics:", stats)
         
     except Exception as e:
         st.error(f"❌ Pinecone V1 connection failed: {str(e)}")
