@@ -263,21 +263,6 @@ with tab1:
             Check the 'Research Papers' tab to see details about the source documents.
             """)
 
-            # Show debug info in an expander
-            with st.expander("Debug Information", expanded=False):
-                st.write("Pinecone V2 available:", PINECONE_V2)
-                st.write("OpenAI API Key available:", "Yes" if openai_api_key else "No")
-                st.write("Pinecone API Key available:", "Yes" if pinecone_api_key else "No")
-                st.write("Pinecone Environment:", pinecone_env)
-                st.write("Pinecone Index Name:", pinecone_index_name)
-                
-                # Display package versions
-                import pkg_resources
-                st.write("Package Versions:")
-                for pkg in pkg_resources.working_set:
-                    if any(x in pkg.key for x in ["pinecone", "llama", "openai"]):
-                        st.write(f"- {pkg.key}: {pkg.version}")
-
             # Question input
             query = st.text_input("What would you like to ask?", "")
 
@@ -300,7 +285,6 @@ with tab1:
 
                     except Exception as e:
                         st.error(f"An error occurred: {str(e)}")
-                        st.exception(e)  # This will show the full traceback for debugging
 
         with history_col:
             st.markdown("### Chat History")
@@ -322,7 +306,6 @@ with tab1:
 
     except Exception as e:
         st.error(f"Setup Error: {str(e)}")
-        st.exception(e)  # Show full traceback for debugging
 
 with tab2:
     st.title("Source Documents")
